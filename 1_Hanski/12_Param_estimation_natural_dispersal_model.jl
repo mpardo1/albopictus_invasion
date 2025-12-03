@@ -1,6 +1,7 @@
-# Code that integrates the Hanski model to obtain the solutions 
-# With input: (from code input_Hanski.R)
+# Code that performs the parameter estimation for the Natural dispersal model
+# With input: (from code albo_mobility/code/Hanski/ESP/input_Hanski_agg.R)
 #     . Flow matrix
+#     . Distance matrix
 #     . R_M time series
 #     . t_min time series
 # And estimate the parameters of the model from the presence absence data
@@ -28,12 +29,14 @@ const m_c = 0.0051 # probability of mosquito in a car
 # Load data input ---------------------------------------------------------------
 const eta = Matrix(CSV.read(loc*"/albo_mobility/data/InputHanski/ESP/flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
 DataFrame, header = true))[1:end,2:end]
+const dist = Matrix(CSV.read(loc*"/albo_mobility/data/InputHanski/ESP/dist_mat_com_ESP.csv",
+DataFrame, header = true))[1:end,2:end]
 const N = size(eta, 1) # Number of patches
 pop_init = zeros(N) # Initial conditions
 
 # Load observations
 obs = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/pa_com.csv",DataFrame)
-year_ic = 2007
+year_ic = 2005
 Col_id = obs[(obs.year_detec .< year_ic),:]
 Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
 
@@ -50,78 +53,6 @@ R_M.time = 1:nrow(R_M)
 time_IC = R_M[R_M.date .== Date(string(year_ic)*"-08-15", "yyyy-mm-dd"),:].time
 time_end = R_M.time[end]
 
-# Function to compute the moving average to smooth a time series
-# Input: 
-#         .arr: vector with time series
-#         .window_size: window size of the moving average
-# Output: Smooth time series
-function moving_average(arr, window_size)
-  return [mean(arr[max(1, i - window_size + 1):i]) for i in 1:length(arr)] 
-end 
-
-# Function to do the moving average and interpolate a time series ---------------------
-function interpolate_timeseries!(int_vec, df, window_size)
-  df = sort(df, :date)
-  # Select columns from the second to the second-to-last column, excluding the third column
-  df = df[:, Not([1])]
-  df = filter(row -> year(row.date) > 2004, df )
-
-  # Apply moving average smoothing to each column except the first one (time column) 
-  if window_size > 1
-    for col in names(df)[2:end] 
-      df[!, col] = moving_average(df[!, col], window_size)
-    end
-  end
-
-  # Interpolate R_M
-  dates = df[:, 1]
-  dfs = Matrix(df[:, 2:end])
-  dates_num = collect(1:size(dates, 1))
-
-  # Perform interpolation for each location
-  for i in 1:N
-      # Extract temperature values for the current location
-      dfs_val = dfs[:, i]
-
-      # Perform linear interpolation
-      itp = DataInterpolations.CubicSpline(dfs_val, dates_num, extrapolate = true)
-      # Store the interpolated function
-      int_vec[i] = itp
-  end
-    
-end
-
-# Interpolate R_M --------------------------------------------------------------------
-# Create an array to store interpolated functions
-InterpType = DataInterpolations.CubicSpline{Vector{Float64}, Vector{Int64},
- Vector{Int64}, Vector{Float64}, Float64}
-interpolated_functions = Vector{InterpType}(undef, N)
-interpolate_timeseries!(interpolated_functions, R_M, 7)
-
-# Test Interpolation
-new_x = collect(1:size(R_M[:, 2], 1))
-p = plot(new_x, interpolated_functions[318].(new_x),
-  label = "Cubic Spline")
-plot!(p,new_x, R_M[:,117], label = "Data")
-
-# Interpolate Min temp --------------------------------------------------------------------
-# Read RM data time series
-tmin = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/min_temp_ESP.csv",DataFrame)
-# Interpolate RM and min temp. First create a global variable
-interpolated_functions_mint = Vector{InterpType}(undef, N)
-interpolate_timeseries!(interpolated_functions_mint, tmin, 1)
-print("After interpolation") 
-
-# # Test Interpolation
-# using StatsPlots
-# new_x = collect(1:size(tmin[:, 2], 1))
-# p = plot(new_x, interpolated_functions_mint[1].(new_x),
-#  ylim = (-10,10), label = "Cubic Spline")
-# plot!(p,new_x, tmin[:,117], label = "Data")
-# x_val = tmin.date
-# y_val = tmin[:,5]
-# plot(x_val, y_val, label = "Data")
-
 # Compute average tmin and RM
 R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
 tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
@@ -129,22 +60,16 @@ tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
 # Load yearly tmin
 tmin_min = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
 
-
 # Non autnomous model ----------------------------------------------------------------------
 function fun_na!(du, u, p, t)
   for i in 1:N
-      du[i]= R_M_mean[i]*sum(j -> (p[1] / (1 + exp(clamp(-p[2] * m_c * eta[i,j] + p[3], -700,700))))*u[j], 1:N) * (1 - u[i]) -
-              exp(clamp(p[4]* tmin_min[i] + p[5], -700,700)) * u[i]
+    du[i]= p[1]*R_M_mean[i] *sum(j -> exp(clamp(-(1/p[2])*dist[i,j],-700,700))*u[j], 1:N) * (1 - u[i]) -
+    exp(clamp(p[3]* tmin_min[i] + p[4], -700,700)) * u[i]
   end
-  # println("du:$du[1:5]")
+
 end
 
-# Test speed
-# using BenchmarkTools
-# p = [0.1,0.0001,5, -0.5,-5] 
-# @benchmark fun_na!($Vector{Float64}(undef,N), $pop_init, $p, 1)
-p = [0.01, 0.204, 6.87, -0.02, -10.42]
-
+p=[0.001, 27861.720, -0.225, -6.45]
 # Create matrix observations -------------------------------------------------------------
 # Remove first column
 obs = obs[:, Not([1])]
@@ -188,13 +113,6 @@ tspan = (t0, tf)
 t_vect=1:tf
 u0 = pop_init
 p = [0.0004,0.15,10,0.1,28000,-0.22,-5.9]
-
-# Test model performance -------------------------------------------------------------------
-# Pkg.add("BenchmarkTools")
-# prob = DifferentialEquations.ODEProblem(fun_na!, u0, (0.0,1000.0), p)
-# @time sol = solve(prob,alg_hints=[:stiff];p=p)
-# plot(sol)
-# @benchmark sol = solve(prob1,alg;p=$p) # Benchmark solution
 
 # Create the model
 prob = DifferentialEquations.ODEProblem(fun_na!, u0, tspan, p)
@@ -247,45 +165,28 @@ function summer_loss_by_year(p)
   end
 end
 
-# Parameters bounds
-low_bound = Float64[0,0,0,-2,-60]
-up_bound = Float64[1,1,200,0,0]
+# Bounds
+low_bound = Float64[0,0,-100,-1000]
+up_bound = Float64[1,100000,0,0]
 
 # Optimizatin -------------------------------------------------------------------------------
 adtype = Optimization.AutoForwardDiff() #AutoFiniteDiff()
 optf = Optimization.OptimizationFunction((p,x) -> summer_loss_by_year(p), adtype) 
 
-# # Initial guess
-# init_param = [0.1 ,0.050 ,9 ,-0.18,-10]
-# # println("init_param:", init_param)
-
-# # # Create the optimization problem with the new parameters
-# optprob = Optimization.OptimizationProblem(optf, init_param, lb = low_bound, ub = up_bound) # Create the optimization problem
-
 # DataFrame to store results
-results_df = DataFrame(init_param1 = Float64[], init_param2 = Float64[], init_param3 = Float64[],init_param4 = Float64[],init_param5 = Float64[],
-                       opt_param1 = Float64[], opt_param2 = Float64[],  opt_param3 = Float64[], opt_param4 = Float64[], opt_param5 = Float64[],
+results_df = DataFrame(init_param1 = Float64[],init_param2 = Float64[],init_param3 = Float64[],init_param4 = Float64[],
+                       opt_param1 = Float64[], opt_param2 = Float64[], opt_param3 = Float64[],opt_param4 = Float64[],
                        objective = Float64[])
 
 # Print number of threads
 println("num threads:",Threads.nthreads())
 flush(stdout)
 
-# Test one try
-# optsol = Optimization.solve(optprob, BFGS(), maxiters = 1000)
-# result_row = hcat(p..., optsol.u..., optsol.objective)
-
 # Loop through different initial parameters parallely --------------------------------------------
+# Threads.@threads 
 for i in 1:20
-  # init_param = rand(5)*0.01
-  # init_param_rel = Float64[0.000474,0.15014,9.5467]
-  # init_param[1] = init_param_rel[1]
-  # init_param[2] = init_param_rel[2]
-  # init_param[3] = init_param_rel[3]
-  # init_param[4] = -0.6 + (rand(1)[1]/10)
-  # init_param[5] = -12.0 + (rand(1)[1])
+  init_param = [rand(1), rand(1), -rand(1), -rand(1)]
 
-  init_param = [0.00021069025532541826, 0.19622471612857578, 6.766191066973541, -0.6697379747677022, -27.283890841172685]
   println("init_param:", init_param)
   result_row = []
   flush(stdout)
@@ -302,7 +203,7 @@ for i in 1:20
     flush(stdout)
   catch e
     println("ERROR: $e")
-    result_row = hcat(init_param..., zeros(5)..., 0.0)
+    result_row = hcat(init_param..., zeros(3)..., 0.0)
     println("result_row: \n $result_row")
     flush(stdout)
   end
@@ -313,17 +214,11 @@ for i in 1:20
 
 end
 
-# Save results in a csv and filter erros -------------------------------------------------------
-current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-# Create the filename with the date 
-filename = loc*"ESP_IC_2006_obs_2006-2023_com_sigmoid_tmin_"*current_date*".csv"
-CSV.write(filename, results_df)
-
-# Estimated parameters
-p=[0.00019500768571673895, 0.1707553296090941, 6.355391841965978, -0.7581545344650137, -44.14554324330141]
+# Save results in a csv  -------------------------------------------------------
+# Compute the solutions
+p =[0.0005639646833044143, 32553.774005521933, -0.18821772990171218, -8.597835989480085]
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "/home/marta/Documentos/PHD/2024/Colonization/output/output_estimation_hummob_meanrm__IC_2004_tmin_H_0_2_"*current_date*".csv"
+filename = "/home/marta/Documentos/PHD/2024/Colonization/output/output_estimation_dist_meanRM_tmin_H_0_2_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
-
