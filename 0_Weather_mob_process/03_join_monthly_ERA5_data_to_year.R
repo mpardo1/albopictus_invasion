@@ -1,10 +1,10 @@
 # Code to join monthly processed data from ERA5 Land from the two files in the 0_Weather_mob_process directory with name starting with 02_process_ERa5_monthly...
 rm(list = ls())
-library("data.table")
-library("ggplot2")
-library("terra")
-library("sf")
-library("tidyverse")
+library(data.table)
+library(ggplot2)
+library(terra)
+library(sf)
+library(tidyverse)
 
 # Join monthly datasets into one year
 path_in <- "data/"

@@ -1,11 +1,11 @@
 # Code to read raster data ERA5 land
 # Load pkgs and remove data -----------------------------------------------------
 rm(list = ls())
-library("data.table")
-library("ggplot2")
-library("terra")
-library("sf")
-library("tidyverse")
+library(data.table)
+library(ggplot2)
+library(terra)
+library(sf)
+library(tidyverse)
 
 # Path to input and output data
 path_in <- "data/"

@@ -1,12 +1,12 @@
 # Code to read raster data ERA5 land and compute yearly minimum temperature
 # Load pkgs and remove data -----------------------------------------------------
 rm(list = ls())
-library("data.table")
-library("ggplot2")
-library("terra")
-library("sf")
-library("tidyverse")
-library("exactextractr")
+library(data.table)
+library(ggplot2)
+library(terra)
+library(sf)
+library(tidyverse)
+library(exactextractr)
 
 # Path to input and output data
 path_in <- "data/"

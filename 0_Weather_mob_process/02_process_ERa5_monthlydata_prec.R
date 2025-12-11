@@ -2,12 +2,11 @@
 #https://cds.climate.copernicus.eu/cdsapp#!/dataset/eu.copernicus.climate.reanalysis-era5-land?tab=overview
 # Load pkgs and remove data -----------------------------------------------------
 rm(list = ls())
-library("data.table")
-library("ggplot2")
-library("terra")
-library("sf")
-library("tidyverse")
-library(parallel)
+library(data.table)
+library(ggplot2)
+library(terra)
+library(sf)
+library(tidyverse)
 
 # Path to input and output data
 path_in <- "data/"
