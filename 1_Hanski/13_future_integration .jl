@@ -13,28 +13,25 @@ import Pkg
 using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataInterpolations,
  DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
  OptimizationPolyalgorithms, SciMLSensitivity, Zygote, Dates
-# Input data for this model in /home/marta/albo_mobility/code/Hanski/ESP/input_Hanski_agg.R
 
+# Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
-loc = "data/output"
-print("Start code\n")
-# loc = "/home/marta/"
-#loc = "G:/mpardo/"
+path_out = "data/output/"
 
 # Constant extract from https://www.nature.com/articles/s41598-017-12652-5
 const m_c = 0.0051 # probability of mosquito in a car
 
 # Load data input ---------------------------------------------------------------
-const eta = Matrix(CSV.read(loc*"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
+const eta = Matrix(CSV.read(path_out*"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
 DataFrame, header = true))[1:end,2:end]
 eta[diagind(eta)] .=0
-const dist = Matrix(CSV.read(loc*"dist_mat_com_ESP.csv",
+const dist = Matrix(CSV.read(path_out*"dist_mat_com_ESP.csv",
 DataFrame, header = true))[1:end,2:end]
 const N = size(eta, 1) # Number of patches
 pop_init = zeros(N) # Initial conditions
 
 # Load observations
-obs = CSV.read(loc*"pa_com_2024.csv",DataFrame)
+obs = CSV.read(path_out*"pa_com_2024.csv",DataFrame)
 obs[obs.year_detec .>= 2023,:]
 year_ic = 2023
 Col_id = obs[(obs.year_detec .< year_ic),:]
@@ -44,7 +41,7 @@ Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
 pop_init[Col_id] .= 1
 
 # Load time series RM 
-R_M = CSV.read(loc*"rm_alb_ESP_com_future.csv",DataFrame)
+R_M = CSV.read(path_out*"rm_alb_ESP_com_future.csv",DataFrame)
 R_M = R_M[year.(R_M.date) .< 2050,:]
 R_M = R_M[:, Not([1])]
 R_M = sort(R_M, :date)
@@ -119,7 +116,7 @@ plot(new_x, interpolated_functions[10].(new_x))
 
 # Interpolate Min temp --------------------------------------------------------------------
 # Read RM data time series
-tmin = CSV.read(loc*"min_temp_ESP_future.csv",DataFrame)
+tmin = CSV.read(path_out*"min_temp_ESP_future.csv",DataFrame)
 tmin = tmin[year.(tmin.date) .< 2050,:]
 tmin = tmin[:, Not([1])]
 tmin = sort(tmin, :date)
@@ -141,7 +138,7 @@ R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
 tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
 
 # Load yearly tmin
-tmin_min = CSV.read(loc*"min_temp_yearly_mean_fut_ESP.csv",DataFrame)[:,3]
+tmin_min = CSV.read(path_out*"min_temp_yearly_mean_fut_ESP.csv",DataFrame)[:,3]
 
 # Non autnomous model ----------------------------------------------------------------------
 function fun_na!(du, u, p, t)

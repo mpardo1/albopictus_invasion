@@ -15,28 +15,24 @@ using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataI
  DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
  OptimizationPolyalgorithms, SciMLSensitivity, Zygote
 
-# Input data for this model in /home/marta/albo_mobility/code/Hanski/ESP/input_Hanski_agg.R
-
+# Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
-loc = "/home/usuaris/m.pardo/"
-print("Start code\n")
-# loc = "/home/marta/"
-#loc = "G:/mpardo/"
+path_out = "data/output/"
 
 # Constant extract from https://www.nature.com/articles/s41598-017-12652-5
 const m_c = 0.0051 # probability of mosquito in a car
 
 # Load data input ---------------------------------------------------------------
-const eta = Matrix(CSV.read(loc*"/albo_mobility/data/InputHanski/ESP/flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
+const eta = Matrix(CSV.read(path_out*"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
 DataFrame, header = true))[1:end,2:end]
 eta[diagind(eta)] .=0
-const dist = Matrix(CSV.read(loc*"/albo_mobility/data/InputHanski/ESP/dist_mat_com_ESP.csv",
+const dist = Matrix(CSV.read(path_out*"dist_mat_com_ESP.csv",
 DataFrame, header = true))[1:end,2:end]
 const N = size(eta, 1) # Number of patches
 pop_init = zeros(N) # Initial conditions
 
 # Load observations
-obs = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/pa_com.csv",DataFrame)
+obs = CSV.read(path_out*"pa_com.csv",DataFrame)
 year_ic = 2005
 Col_id = obs[(obs.year_detec .< year_ic),:]
 Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
@@ -45,7 +41,7 @@ Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
 pop_init[Col_id] .= 1
 
 # Load time series RM 
-R_M = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
+R_M = CSV.read(path_out*"3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
 
 # Add row number as time
 R_M.time = 1:nrow(R_M)
@@ -55,14 +51,14 @@ time_IC = R_M[R_M.date .== Date(string(year_ic)*"-08-15", "yyyy-mm-dd"),:].time
 time_end = R_M.time[end]
 
 # Load tmin data
-tmin = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/min_temp_ESP.csv",DataFrame)
+tmin = CSV.read(path_out*"min_temp_ESP.csv",DataFrame)
 
 # Compute average tmin and RM
 R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
 tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
 
 # Load yearly tmin
-tmin_min = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
+tmin_min = CSV.read(path_out*"min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
 
 # Non autnomous model ----------------------------------------------------------------------
 function fun_na!(du, u, p, t)
@@ -170,7 +166,7 @@ function summer_loss_by_year(p)
 end
 
 # Save matrix obs
-filename = loc*"obs_2005-2023.csv"
+filename = path_out*"obs_2005-2023.csv"
 CSV.write(filename, DataFrame(matrix_obs, :auto))
 
 # Parameters bounds
@@ -227,8 +223,16 @@ end
 # Save results in a csv and filter erros -------------------------------------------------------
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 # Create the filename with the date 
-filename = loc*"obs_2004_sigmob_dist_RM_tmin_avg_"*current_date*".csv"
+filename = path_out*"obs_2004_sigmob_dist_RM_tmin_avg_"*current_date*".csv"
 CSV.write(filename, results_df)
+
+# Run simulation with estimated parameters
+p= [0.0005706731568571676, 97.78894801161957, 5424.950376420903, 6.97762397002697e-5, 51314.7750145224, -6.874687389443576, -80.94731156667044]
+sol = hanski_prediction(p)
+summer_avg_by_year = average_summer_solution_by_year(sol)
+current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
+filename = path_out*"output_mean_tminRM_H_0_2_IC_2004_"*current_date*".csv"
+CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
 
 # Run knock out escenarios ------------------------------------------------------------------------------------
 # No human mobility
@@ -236,7 +240,7 @@ p= [0, 97.78894801161957, 5424.950376420903, 6.97762397002697e-5, 51314.77501452
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "/home/marta/Documentos/PHD/2024/Colonization/output/output_mean_tminRM_H_0_2_nohum_IC_2004_"*current_date*".csv"
+filename = path_out*"output_mean_tminRM_H_0_2_nohum_IC_2004_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
 
 # No natural dispersal
@@ -244,58 +248,8 @@ p= [0.0005706731568571676, 97.78894801161957, 5424.950376420903, 0, 51314.775014
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "/home/marta/Documentos/PHD/2024/Colonization/output/output_mean_tminRM_H_0_2_nodist_IC_2004_"*current_date*".csv"
-CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
-
-# Run with estimated parameters for one more year --------------------------------------------------------------
-# Add 2024 as 2023
-df_2023 = filter(row -> year(row.date) == 2023, R_M)
-df_2024 = deepcopy(df_2023)
-df_2024.date .= df_2024.date .+ Year(1)  # Shift dates to 2024
-max_time = maximum(R_M.time)
-df_2024.time .= (max_time + 1):(max_time + nrow(df_2024))
-R_M = vcat(R_M, df_2024)
-interpolated_functions = Vector{InterpType}(undef, N)
-interpolate_timeseries!(interpolated_functions, R_M, 7)
-
-# Read RM data time series
-df_2023 = filter(row -> year(row.date) == 2023, tmin)
-df_2024 = deepcopy(df_2023)
-df_2024.date .= df_2024.date .+ Year(1)  # Shift dates to 2024
-max_time = maximum(tmin.Column1)
-df_2024.Column1 .= (max_time + 1):(max_time + nrow(df_2024))
-tmin = vcat(tmin, df_2024)
-interpolated_functions_mint = Vector{InterpType}(undef, N)
-interpolate_timeseries!(interpolated_functions_mint, tmin, 1)
-print("After interpolation") 
-
-# Change time
-t0=t_obs[end]
-tf= t_obs[end] + 400
-tspan = (t0, tf)
-t_vect=1:tf
-prob = DifferentialEquations.ODEProblem(fun_na!, u0, tspan, p)
-p=[0.00034758402240939553, 0.35206796353051073, 19.96722933911206, 7.905021846152038e-5, 51978.61421064834, -1.3661892831684044, -25.681553759112123]
-sol = solve(prob, alg=TRBDF2(); abstol=1e-8, reltol=1e-8)
-vec_year = unique(year.(R_M.date))[3:end] # Vector of summer times per year
-summer_t_obs_by_year = summer_times_by_year(R_M)
-summer_avg_by_year = average_summer_solution_by_year(sol)
-current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "/home/marta/Documentos/PHD/2024/Colonization/output/com_opt_simulation_dits_sig_mob_tmin_RM_matrix_2024_"*current_date*".csv"
+filename = path_out*"output_mean_tminRM_H_0_2_nodist_IC_2004_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
 
 
-# Change time
-t0=t_obs[end]
-tf= t_obs[end] + 400
-tspan = (t0, tf)
-t_vect=1:tf
-prob = DifferentialEquations.ODEProblem(fun_na!, u0, tspan, p)
-p=[0., 0.35206796353051073, 19.96722933911206, 7.905021846152038e-5, 51978.61421064834, -1.3661892831684044, -25.681553759112123]
-sol = solve(prob, alg=TRBDF2(); abstol=1e-8, reltol=1e-8)
-vec_year = unique(year.(R_M.date))[3:end] # Vector of summer times per year
-summer_t_obs_by_year = summer_times_by_year(R_M)
-summer_avg_by_year = average_summer_solution_by_year(sol)
-current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "/home/marta/Documentos/PHD/2024/Colonization/output/com_opt_simulation_dits_sig_no_mob_tmin_RM_matrix_2024_"*current_date*".csv"
-CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
+

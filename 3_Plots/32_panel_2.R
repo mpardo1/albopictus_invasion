@@ -1,4 +1,5 @@
-# Code to reproduce panel 2 results paper
+# Code to compute plots for panel 2 in the main manuscript
+# Remove everything before starting
 rm(list=ls())
 library(data.table)
 library(ggplot2)
@@ -10,8 +11,8 @@ library(ggsci)
 library(mapSpain)
 
 # Data path
-path_in <- "data/output/"
-path_plots <- "plots/"
+path_out <- "data/output/"
+path_plots <- "plots/" # Select a path to save the plots
 
 # Plot LS all models from lowest to highest ------------------------------------
 # Least squared figure from data computed with code albo_mobility/code/Hanski/ESP/
@@ -51,11 +52,11 @@ tbl
 #   tab_add_vline(at.column = 1, column.side = "left", linewidth = 3, linetype = 1)
 
 # Matrices simulation and observations -----------------------------
-Path <- paste0(path_in,"obs_2005-2023.csv")
+Path <- paste0(path_out,"obs_2005-2023.csv")
 obs <- read.csv(Path)
-Path <- paste0(path_in,"output_mean_tminRM_H_0_2_IC_2004_2025-05-23.csv")s
+Path <- paste0(path_out,"output_mean_tminRM_H_0_2_IC_2004_2025-05-23.csv")
 sim_mat <- read.csv(Path)
-Path <- paste0(path_in,"pa_com.csv")
+Path <- paste0(path_out,"pa_com.csv")
 pa_com <- read.csv(Path)
 
 # Convert to a data frame
@@ -113,7 +114,7 @@ mean(df_obs_sim[df_obs_sim$obs == 0,]$sim)
 
 # Map with LS of all years ---------------------------------------------
 # Load data comarcas shapefile
-comarcas <- read_sf(paste0(path_in,"ComarcasAgrarias.shp"))
+comarcas <- read_sf(paste0(path_out,"ComarcasAgrarias.shp"))
 comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
                        comarcas$DS_CCAA != "Melilla" &
                        comarcas$DS_CCAA != "Islas Baleares" &
@@ -314,10 +315,10 @@ ggarrange_tm
 # Test different models --------------------------------------------------
 plot_bp_map <- function(Path,year_n, pa_bool){
   # Matrices simulation and observations -----------------------------
-  Path_obs <- paste0(path_in,"obs_matrix_com.csv")
+  Path_obs <- paste0(path_out,"obs_matrix_com.csv")
   obs <- read.csv(Path_obs)
   sim_mat <- read.csv(Path)
-  Path_pa <- paste0(path_in,"pa_com.csv")
+  Path_pa <- paste0(path_out,"pa_com.csv")
   pa_com <- read.csv(Path_pa)
   
   # Convert to a data frame
@@ -333,7 +334,7 @@ plot_bp_map <- function(Path,year_n, pa_bool){
     mutate(Year = as.integer(Year))  # Ensure Year is numeric
   
   # Convert to a data frame
-  obs <- read.csv(paste0(path_in,"obs_2005-2023.csv"))
+  obs <- read.csv(paste0(path_out,"obs_2005-2023.csv"))
   colnames(obs) <- 2005:2023 
   df_obs <- as.data.frame(obs)
   df_obs$CO_COMARCA <- pa_com$CO_COMARCA # Add Comarca names as a column
@@ -398,7 +399,7 @@ plot_bp_map <- function(Path,year_n, pa_bool){
 }
 
 # Load shapefile
-comarcas <- read_sf(paste0(path_in,"ComarcasAgrarias.shp"))
+comarcas <- read_sf(paste0(path_out,"ComarcasAgrarias.shp"))
 comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
                        comarcas$DS_CCAA != "Melilla" &
                        comarcas$DS_CCAA != "Islas Baleares" &
@@ -413,19 +414,19 @@ ESP_per <- st_union(ESP_per)
 # H=0.2 different fits ----------------------------------------------------
 # Try different models data from julia code: albo_mobility/code/Hanski/ESP/...jl
 year_n = 2023
-Path <- paste0(path_in,"output_mean_tminRM_H_0_2_IC_2004_2025-05-20.csv")
+Path <- paste0(path_out,"output_mean_tminRM_H_0_2_IC_2004_2025-05-20.csv")
 full_mod <- plot_bp_map(Path,year_n,1)
 full_mod[[1]]
 full_mod[[2]]
-Path <- paste0(path_in,"output_estimation_hummob_meanrm__IC_2004_tmin_H_0_2_2025-05-23.csv")
+Path <- paste0(path_out,"output_estimation_hummob_meanrm__IC_2004_tmin_H_0_2_2025-05-23.csv")
 hum_mob <- plot_bp_map(Path,year_n,1)
 hum_mob[[1]]
 hum_mob[[2]]
-Path <- paste0(path_in,"output_estimation_pop_growth_meanRMtmin_H_0_2_2025-05-23.csv")
+Path <- paste0(path_out,"output_estimation_pop_growth_meanRMtmin_H_0_2_2025-05-23.csv")
 pop_growth <- plot_bp_map(Path,year_n,1)
 pop_growth[[1]]
 pop_growth[[2]]
-Path <- paste0(path_in,"output_estimation_dist_meanRM_tmin_H_0_2_2025-05-23.csv")
+Path <- paste0(path_out,"output_estimation_dist_meanRM_tmin_H_0_2_2025-05-23.csv")
 dist_mod_df <- read.csv(Path)
 dist_mod <- plot_bp_map(Path,2023,1)
 dist_mod[[1]]
@@ -438,9 +439,9 @@ ggarrange(full_mod[[1]] + ggtitle("Full Model"),
           pop_growth[[1]] + ggtitle("Climate-driven Growth"))
 
 # Save the plot
-ggsave(paste0(path_in,"bp_all_models_meanRM_IC_2004.png"),
+ggsave(paste0(path_out,"bp_all_models_meanRM_IC_2004.png"),
        dpi = 350, height =9 , width = 12)
-ggsave(paste0(path_in,"bp_all_models_meanRM_IC_2004.pdf"),
+ggsave(paste0(path_out,"bp_all_models_meanRM_IC_2004.pdf"),
        height = 9, width = 12)
 
 
@@ -452,9 +453,9 @@ maps_panel <- ggarrange(full_mod[[2]] + ggtitle("Full Model"),
 maps_panel
 
 # Save the plot
-ggsave(paste0(path_in,"val_maps_all_models_meanRM_IC_2004.png"),
+ggsave(paste0(path_out,"val_maps_all_models_meanRM_IC_2004.png"),
        dpi = 350, height =9 , width = 9)
-ggsave(paste0(path_in,"val_maps_all_models_meanRM_IC_2004.pdf"),
+ggsave(paste0(path_out,"val_maps_all_models_meanRM_IC_2004.pdf"),
        height = 9, width = 9)
 
 # # Knock-out scenarios ---------------------------------------------------
@@ -462,10 +463,10 @@ ggsave(paste0(path_in,"val_maps_all_models_meanRM_IC_2004.pdf"),
 # pop_growth <- plot_bp_map(Path,2023)
 # pop_growth[[2]]
 
-Path <- paste0(path_in,"output_mean_tminRM_H_0_2_nodist_IC_2004_2025-05-23.csv")
+Path <- paste0(path_out,"output_mean_tminRM_H_0_2_nodist_IC_2004_2025-05-23.csv")
 nodist_mod <- plot_bp_map(Path,2023,0)
 nodist_mod[[2]]
-Path <- paste0(path_in,"output_mean_tminRM_H_0_2_nohum_IC_2004_2025-05-23.csv")
+Path <- paste0(path_out,"output_mean_tminRM_H_0_2_nohum_IC_2004_2025-05-23.csv")
 nohum_mob <- plot_bp_map(Path,2023,0)
 nohum_mob[[2]]
 
@@ -502,7 +503,7 @@ ggsave(paste0(path_plots,"panel2_knock_out_IC2004.pdf"),
 
 
 # Arrange results with other models ------------------
-Path <- paste0(path_in,"output_estimation_hummob_meanrm__IC_2004_tmin_H_0_2_2025-05-20.csv")
+Path <- paste0(path_out,"output_estimation_hummob_meanrm__IC_2004_tmin_H_0_2_2025-05-20.csv")
 hum_mob_0 <- plot_bp_map(Path,year_n,0)
 hum_mob_0[[2]]
 Path <- paste0(path_plots,"output_estimation_dist_meanRM_tmin_H_0_2_IC_2004_2025-05-20.csv")

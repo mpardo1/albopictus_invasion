@@ -1,4 +1,5 @@
-# Code to reproduce panel 2 results paper
+# Code to compute plots for panel 3 in the main manuscript
+# Remove everything before starting
 rm(list=ls())
 library(data.table)
 library(ggplot2)
@@ -10,12 +11,12 @@ library(ggsci)
 library(mapSpain)
 
 # Data path
-path_in <- "data/output/"
-path_plots <- "plots/"
+path_out <- "data/output/"
+path_plots <- "plots/" # Select a path to save the plots
 
 # Run before anything -----------------------------------------
 # Load shapefile
-comarcas <- read_sf(paste0(path_in,"ComarcasAgrarias.shp"))
+comarcas <- read_sf(paste0(path_out,"ComarcasAgrarias.shp"))
 comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
                        comarcas$DS_CCAA != "Melilla" &
                        comarcas$DS_CCAA != "Islas Baleares" &
@@ -29,7 +30,7 @@ ESP_per <- st_union(ESP_per)
 
 # --------------------------------------------------------------
 # Plots RM 2023 -------------------------------------------------
-df_clim_ESP <-read.csv(paste0(path_in,"rm_alb_ESP_com.csv"))
+df_clim_ESP <-read.csv(paste0(path_out,"rm_alb_ESP_com.csv"))
 df_clim_ESP <- df_clim_ESP[year(df_clim_ESP$date) == 2023,]
 
 # Convert to long format
@@ -58,10 +59,10 @@ suit_days <- ggplot(df_clim_ESP) +
         legend.text = element_text(size = 12))
 
 # Plot inflows prensece comarca 2023 --------------------------------------
-flows_df <- read.csv(paste0(path_in,"flows_com_df.csv"))
+flows_df <- read.csv(paste0(path_out,"flows_com_df.csv"))
 flows_df$X <- NULL
 flows_df$CO_COMARCA <- flows_df$CO_COMARCA_origin
-pa_com <- read.csv(paste0(path_in,"/pa_com.csv"))
+pa_com <- read.csv(paste0(path_out,"/pa_com.csv"))
 pa_com$X <- NULL
 
 # Join presence data set with the origin
@@ -94,7 +95,7 @@ m_c = 0.0051
 
 # Sigmoid function
 sigmoid <- function(x){param[1]/(1+exp(-param[2]*m_c*x+ param[3]))}
-flows_mat <- read.csv(paste0(path_in,"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv"))[,-1]
+flows_mat <- read.csv(paste0(path_out,"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv"))[,-1]
 vec <- seq(0, max(flows_mat,na.rm =TRUE), 100)
 out <- sapply(vec, sigmoid)
 df_out_exp <- data.frame(vec,out_med = out)
@@ -119,7 +120,7 @@ min(df_out_exp[df_out_exp$out_med == max(df_out_exp$out_med),]$vec)
 
 # Plot the flows that are with colonimax()# Plot the flows that are with colonization rate big ----------------------
 library(maptools)
-flows_df <- read.csv(paste0(path_in,"flows_com_df.csv"))
+flows_df <- read.csv(paste0(path_out,"flows_com_df.csv"))
 
 # Remove flows from the same origin and destination
 flows_df$X <- NULL
@@ -195,7 +196,7 @@ flows_thres_plot
 #        flows_thres, width = 8, height = 6, dpi = 300)
 
 # Check the distance threshold given by the model-----------------------------
-dist_mat <- read.csv(paste0(path_in,"dist_mat_com_ESP.csv"))
+dist_mat <- read.csv(paste0(path_out,"dist_mat_com_ESP.csv"))
 comarcas <- st_make_valid(comarcas)
 comarcas$area <- st_area(comarcas)
 comarca_unique <- comarcas %>%
@@ -219,11 +220,11 @@ ggplot(dist_df_filt) +
         legend.text = element_text(size = 12))
 
 # Plot distances histogram of neightbour geometries---------------------------
-dist_mat <- read.csv(paste0(path_in,"dist_mat_com_ESP.csv"))
+dist_mat <- read.csv(paste0(path_out,"dist_mat_com_ESP.csv"))
 dist_mat <- dist_mat[,-1]
 
 # Compute neightbout distances
-dist_neight <- readRDS(paste0(path_in,"dist_neight.Rds"))
+dist_neight <- readRDS(paste0(path_out,"dist_neight.Rds"))
 
 # Join two distances
 dist_neight_cent <- data.frame(dist_neig = as.numeric(c(dist_neight)),
@@ -234,8 +235,8 @@ ggplot(dist_neight_cent[dist_neight_cent$dist_neig==0,]) +
   theme_minimal() + xlab("Distance (m)")
 
 # Distance between "important" flows 
-flows_mat <- read.csv(paste0(path_in,"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv"))
-dist_mat <- read.csv(paste0(path_in,"dist_mat_com_ESP.csv"))
+flows_mat <- read.csv(paste0(path_out,"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv"))
+dist_mat <- read.csv(paste0(path_out,"dist_mat_com_ESP.csv"))
 flows_mat <- as.matrix(flows_mat)
 flows_mat <- flows_mat[,2:ncol(flows_mat)]
 dist_mat <- as.matrix(dist_mat)
@@ -318,9 +319,9 @@ sig_plot <- ggplot() +
 sig_plot
 
 # Plot correlation distance mobility -------------------------------------------
-flows_mat <- read.csv(paste0(path_in,"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv"))
+flows_mat <- read.csv(paste0(path_out,"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv"))
 diag(flows_mat) <- 0
-dist_mat <- read.csv(paste0(path_in,"dist_mat_com_ESP.csv"))
+dist_mat <- read.csv(paste0(path_out,"dist_mat_com_ESP.csv"))
 diag(dist_mat) <- 0
 max(flows_mat)
 flows_mat <- as.matrix(flows_mat)
@@ -400,8 +401,8 @@ ggsave(paste0(path_plots,"panel_sup_hum_mob.pdf"),
 mean(as.numeric(c(dist_mat)))
 
 # Plot suitability 2023 ------------------------------------------------
-pa_com <- read.csv(paste0(path_in,"pa_com.csv"))[,-1]
-rm2 <- read.csv(paste0(path_in,"3_rm_alb_ESP_com.csv"))
+pa_com <- read.csv(paste0(path_out,"pa_com.csv"))[,-1]
+rm2 <- read.csv(paste0(path_out,"3_rm_alb_ESP_com.csv"))
 rm2 <- rm2[year(rm2$date) == 2023,-1]
 
 # Transform to long format
@@ -445,8 +446,8 @@ ggsave(paste0(path_plots,"suit_days_vs_full_model.pdf"),
 
 # Maximum natural dispersal ------------------------------------------------------
 # Load data
-df_out_nat <- read.csv(paste0(path_in,"natural_dispersal_one_year_2025-05-28.csv"))
-dist_mat <- read.csv(paste0(path_in,"dist_mat_com_ESP.csv"))[,-1]
+df_out_nat <- read.csv(paste0(path_out,"natural_dispersal_one_year_2025-05-28.csv"))
+dist_mat <- read.csv(paste0(path_out,"dist_mat_com_ESP.csv"))[,-1]
 
 # Extract first detection
 comarca_init <- df_out_nat[df_out_nat$out == 1,]$CO_COMARCA

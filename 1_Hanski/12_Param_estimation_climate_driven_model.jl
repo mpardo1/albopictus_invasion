@@ -16,14 +16,16 @@ using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataI
  DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
  OptimizationPolyalgorithms, SciMLSensitivity, Zygote
 
+
+# Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
-#loc = "G:/mpardo/"
+path_out = "data/output/"
 
 # Constant extract from https://www.nature.com/articles/s41598-017-12652-5
 const m_c = 0.0051 # probability of mosquito in a car
 
 # Load data input ---------------------------------------------------------------
-const eta = Matrix(CSV.read(loc*"/albo_mobility/data/InputHanski/ESP/flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
+const eta = Matrix(CSV.read(path_out*"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
 DataFrame, header = true))[1:end,2:end]
 const N = size(eta, 1) # Number of patches
 pop_init = zeros(N) # Initial conditions
@@ -35,7 +37,7 @@ for i in 1:N
 end
 
 # Load observations
-obs = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/pa_com.csv",DataFrame)
+obs = CSV.read(path_out*"pa_com.csv",DataFrame)
 year_ic = 2005
 Col_id = obs[(obs.year_detec .< year_ic),:]
 Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
@@ -44,7 +46,7 @@ Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
 pop_init[Col_id] .= 1
 
 # Load time series RM 
-R_M = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
+R_M = CSV.read(path_out*"3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
 
 # Add row number as time
 R_M.time = 1:nrow(R_M)
@@ -58,7 +60,7 @@ R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
 tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
 
 # Load yearly tmin
-tmin_min = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
+tmin_min = CSV.read(path_out*"min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
 
 # Non autnomous model ----------------------------------------------------------------------
 function fun_na!(du, u, p, t)
@@ -111,7 +113,7 @@ tf= t_obs[end] + 10
 tspan = (t0, tf)
 t_vect=1:tf
 u0 = pop_init
-p = [0.0004,0.15,10,0.1,28000,-0.22,-5.9]
+p = [0.0004,0.15,10,0.1,28000,-0.22,-5.9] # set one p to any vector
 
 # Test model performance -------------------------------------------------------------------
 # Pkg.add("BenchmarkTools")
@@ -170,7 +172,7 @@ function summer_loss_by_year(p)
 end
 
 # Parameters bounds
-low_bound = Float64[0,-50,-200]
+low_bound = Float64[0,-200,-500]
 up_bound = Float64[1,0,0]
 
 # Optimizatin -------------------------------------------------------------------------------
@@ -220,5 +222,5 @@ end
 # Save results in a csv and filter erros -------------------------------------------------------
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 # Create the filename with the date 
-filename = loc*"ESP_IC_2006_obs_2006-2023_com_mob1_tmin_"*current_date*".csv"
+filename = path_out*"ESP_IC_2006_obs_2006-2023_com_mob1_tmin_"*current_date*".csv"
 CSV.write(filename, results_df)

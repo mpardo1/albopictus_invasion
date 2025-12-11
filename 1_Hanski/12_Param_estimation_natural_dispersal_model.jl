@@ -15,27 +15,24 @@ using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataI
  DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
  OptimizationPolyalgorithms, SciMLSensitivity, Zygote
 
-# Input data for this model in /home/marta/albo_mobility/code/Hanski/ESP/input_Hanski_agg.R
 
+# Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
-loc = "/home/usuaris/m.pardo/"
-print("Start code\n")
-# loc = "/home/marta/"
-#loc = "G:/mpardo/"
+path_out = "data/output/"
 
 # Constant extract from https://www.nature.com/articles/s41598-017-12652-5
 const m_c = 0.0051 # probability of mosquito in a car
 
 # Load data input ---------------------------------------------------------------
-const eta = Matrix(CSV.read(loc*"/albo_mobility/data/InputHanski/ESP/flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
+const eta = Matrix(CSV.read(path_out*"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
 DataFrame, header = true))[1:end,2:end]
-const dist = Matrix(CSV.read(loc*"/albo_mobility/data/InputHanski/ESP/dist_mat_com_ESP.csv",
+const dist = Matrix(CSV.read(path_out*"dist_mat_com_ESP.csv",
 DataFrame, header = true))[1:end,2:end]
 const N = size(eta, 1) # Number of patches
 pop_init = zeros(N) # Initial conditions
 
 # Load observations
-obs = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/pa_com.csv",DataFrame)
+obs = CSV.read(path_out*"pa_com.csv",DataFrame)
 year_ic = 2005
 Col_id = obs[(obs.year_detec .< year_ic),:]
 Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
@@ -44,7 +41,7 @@ Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
 pop_init[Col_id] .= 1
 
 # Load time series RM 
-R_M = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
+R_M = CSV.read(path_out*"3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
 
 # Add row number as time
 R_M.time = 1:nrow(R_M)
@@ -58,7 +55,7 @@ R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
 tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
 
 # Load yearly tmin
-tmin_min = CSV.read(loc*"albo_mobility/data/InputHanski/ESP/min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
+tmin_min = CSV.read(path_out*"min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
 
 # Non autnomous model ----------------------------------------------------------------------
 function fun_na!(du, u, p, t)
@@ -215,10 +212,10 @@ for i in 1:20
 end
 
 # Save results in a csv  -------------------------------------------------------
-# Compute the solutions
+# Integrate with estimated parameters
 p =[0.0005639646833044143, 32553.774005521933, -0.18821772990171218, -8.597835989480085]
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "/home/marta/Documentos/PHD/2024/Colonization/output/output_estimation_dist_meanRM_tmin_H_0_2_"*current_date*".csv"
+filename = path_out*"output_estimation_dist_meanRM_tmin_H_0_2_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))

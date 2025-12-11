@@ -11,27 +11,25 @@ using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataI
  DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
  OptimizationPolyalgorithms, SciMLSensitivity, Zygote, Random
 
+
+# Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
-loc = "/home/m.pardo/albo_mobility/data/data_julia/"
-#loc = "/home/marta/albo_mobility/data/data_julia/"
-print("Start code\n")
-# loc = "/home/marta/"
-#loc = "G:/mpardo/"
+path_out = "data/output/"
 
 # Constant extract from https://www.nature.com/articles/s41598-017-12652-5
 const m_c = 0.0051 # probability of mosquito in a car
 
 # Load data input ---------------------------------------------------------------
-const eta = Matrix(CSV.read(loc*"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
+const eta = Matrix(CSV.read(path_out*"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv",
 DataFrame, header = true))[1:end,2:end]
 eta[diagind(eta)] .=0
-const dist = Matrix(CSV.read(loc*"dist_mat_com_ESP.csv",
+const dist = Matrix(CSV.read(path_out*"dist_mat_com_ESP.csv",
 DataFrame, header = true))[1:end,2:end]
 const N = size(eta, 1) # Number of patches
 pop_init = zeros(N) # Initial conditions
 
 # Load observations
-obs = CSV.read(loc*"pa_com.csv",DataFrame)
+obs = CSV.read(path_out*"pa_com.csv",DataFrame)
 year_ic = 2005
 Col_id = obs[(obs.year_detec .< year_ic),:]
 Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
@@ -40,7 +38,7 @@ Col_id = Col_id[(Col_id.year_detec .> 0),:].Column1
 pop_init[Col_id] .= 1
 
 # Load time series RM 
-R_M = CSV.read(loc*"3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
+R_M = CSV.read(path_out*"3_rm_alb_ESP_com_0_2_v2.csv",DataFrame)
 
 # Add row number as time
 R_M.time = 1:nrow(R_M)
@@ -50,14 +48,14 @@ time_IC = R_M[R_M.date .== Date(string(year_ic)*"-08-15", "yyyy-mm-dd"),:].time
 time_end = R_M.time[end]
 
 # Load tmin data
-tmin = CSV.read(loc*"min_temp_ESP.csv",DataFrame)
+tmin = CSV.read(path_out*"min_temp_ESP.csv",DataFrame)
 
 # Compute average tmin and RM
 R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
 tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
 
 # Load yearly tmin
-tmin_min = CSV.read(loc*"min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
+tmin_min = CSV.read(path_out*"min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
 
 # Non autnomous model ----------------------------------------------------------------------
 function fun_na!(du, u, p, t)
@@ -165,7 +163,7 @@ function summer_loss_by_year(p)
 end
 
 # # Save matrix obs
-# filename = loc*"obs_2005-2023.csv"
+# filename = path_out*"obs_2005-2023.csv"
 # CSV.write(filename, DataFrame(matrix_obs, :auto))
 
 # Parameters bounds
@@ -200,7 +198,7 @@ for i in 1:20
   matrix_obs[inds] .=rand(0:1,n) 
 
   # Save new observations
-  filename = loc*"Matrix_0_01_randomly_"*string(i)*".csv"
+  filename = path_out*"Matrix_0_01_randomly_"*string(i)*".csv"
   CSV.write(filename, DataFrame(matrix_obs, :auto))
 
 
@@ -234,5 +232,5 @@ end
 # Save results in a csv and filter erros -------------------------------------------------------
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 # Create the filename with the date 
-filename = loc*"obs_2004_sigmob_dist_RM_tmin_avg_"*current_date*".csv"
+filename = path_out*"obs_2004_sigmob_dist_RM_tmin_avg_"*current_date*".csv"
 CSV.write(filename, results_df)

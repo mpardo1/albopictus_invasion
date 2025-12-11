@@ -1,3 +1,5 @@
+# Code to reproduce figure 4 main and figure S9 Supplementary material
+# Remove everything before starting
 rm(list=ls())
 library(data.table)
 library(ggplot2)
@@ -8,17 +10,17 @@ library(ggbreak)
 library(patchwork)
 
 # Path depending on location
-path_in <- "~/albo_mobility/"
-path_out <- "~/output_phase_space/"
+path_out <- "data/output/"
+path_plots <- "plots/" # Select a path to save the plots
 
-# Estimated parameters
+# Estimated parameters from the Parameter estimation from the Full model 12_Param_estimation_full_model.jl
 param <- c(0.0005706731568571638, 97.78894801162286, 5424.950376421082,
            6.977623970027257e-5, 51314.77501452204, -6.874687389443816, -80.947311566672)
 m_c = 0.0051
 
 # c2 vs e2 -------------------------------------------------------------------
 # Read output Present
-path_pc <- paste0(path_in,"output_phase_space/")
+path_pc <- paste0(path_out,"output_phase_space/")
 list_f <- list.files(path_pc, pattern = "ext_2")
 grid1_pres <- readRDS(paste0(path_pc, list_f[[1]]))
 grid2_pres <- readRDS(paste0(path_pc, list_f[[2]]))
@@ -179,14 +181,14 @@ ggsave(paste0(path_plots, "phasespace_pres_fut.pdf"),
 
 # Future scenarios ----------------------------------------------------
 # Load shapefile comarcas
-comarcas <- read_sf(paste0(path_in, "ComarcasAgrarias.shp"))
+comarcas <- read_sf(paste0(path_out, "ComarcasAgrarias.shp"))
 comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
                        comarcas$DS_CCAA != "Melilla" &
                        comarcas$DS_CCAA != "Islas Baleares" &
                        comarcas$DS_CCAA != "Canarias", ]
 
 # Load observations
-Path <- paste0(path_in, "pa_com.csv")
+Path <- paste0(path_out, "pa_com.csv")
 pa_com <- read.csv(Path)
 
 
@@ -239,13 +241,13 @@ plot_sce <- function(df_aux, year_n){
 }
 
 # Future scenarios
-Path <- paste0(path_in, "com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
+Path <- paste0(path_out, "com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
 normal_sce <- read.csv(Path)
-Path <-   paste0(path_in, "low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
+Path <-   paste0(path_out, "low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
 low_sig_sce <- read.csv(Path)
-Path <- paste0(path_in, "low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
+Path <- paste0(path_out, "low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
 low_sig_high_e_sce <- read.csv(Path)
-Path <- "/home/marta/Documentos/PHD/2024/Colonization/output/high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv"
+Path <- paste0(path_out, "high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
 high_e_sce <- read.csv(Path)
 
 # Arrange plots
@@ -304,20 +306,20 @@ ggsave(paste0(path_plots, "panel3_cividis_ver.pdf"),
 
 # Panel supplementary present future climate ----------------------------
 # Load data
-mean_RM_fut <- readRDS(paste0(path_in, "mean_RM_fut_ESP.Rds"))
+mean_RM_fut <- readRDS(paste0(path_out, "mean_RM_fut_ESP.Rds"))
 mean_fut <- data.frame(CO_COMARCA = sub("X","", names(mean_RM_fut)) ,
                           mean_RM_fut =as.numeric(mean_RM_fut))
-min_tmin_fut <- readRDS(paste0(path_in, "min_temp_yearly_mean_fut_ESP.Rds"))
+min_tmin_fut <- readRDS(paste0(path_out, "min_temp_yearly_mean_fut_ESP.Rds"))
 mean_fut$tmin_fut <- min_tmin_fut
-mean_RM <- readRDS(paste0(path_in, "mean_RM_ESP.Rds"))
+mean_RM <- readRDS(paste0(path_out, "mean_RM_ESP.Rds"))
 mean_pres <- data.frame(CO_COMARCA = sub("R0_alb.","", names(mean_RM)) ,
                       mean_RM =as.numeric(mean_RM))
-min_tmin <- readRDS(paste0(path_in, "min_tmin_ESP.Rds"))
+min_tmin <- readRDS(paste0(path_out, "min_tmin_ESP.Rds"))
 mean_pres$tmin <- min_tmin
 min(min_tmin)
 min(min_tmin_fut)
 # Load shapefile comarcas
-comarcas <- read_sf(paste0(path_in, "ComarcasAgrarias.shp"))
+comarcas <- read_sf(paste0(path_out, "ComarcasAgrarias.shp"))
 comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
                        comarcas$DS_CCAA != "Melilla" &
                        comarcas$DS_CCAA != "Islas Baleares" &
@@ -440,14 +442,14 @@ ggsave(paste0(path_plots, "panel_tmin_rm_pres_fut.pdf"),
 
 # Supplementary material future scenarios past climate------------------
 # Load shapefile comarcas
-comarcas <- read_sf(paste0(path_in, "ComarcasAgrarias.shp"))
+comarcas <- read_sf(paste0(path_out, "ComarcasAgrarias.shp"))
 comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
                        comarcas$DS_CCAA != "Melilla" &
                        comarcas$DS_CCAA != "Islas Baleares" &
                        comarcas$DS_CCAA != "Canarias", ]
 
 # Load observations
-Path <- paste0(path_in, "pa_com.csv")
+Path <- paste0(path_out, "pa_com.csv")
 pa_com <- read.csv(Path)
 
 
@@ -500,13 +502,13 @@ plot_sce <- function(df_aux, year_n){
 }
 
 # Future scenarios
-Path <- paste0(path_in, "com_opt_simulation_dits_sig_mob_tmin_RM_fut_past_clim_2025-05-28.csv")
+Path <- paste0(path_out, "com_opt_simulation_dits_sig_mob_tmin_RM_fut_past_clim_2025-05-28.csv")
 normal_sce <- read.csv(Path)
-Path <-  paste0(path_in, "low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut__past_clim_2025-05-28.csv")
+Path <-  paste0(path_out, "low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut__past_clim_2025-05-28.csv")
 low_sig_sce <- read.csv(Path)
-Path <-  paste0(path_in, "high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut__past_clim_2025-05-28.csv")
+Path <-  paste0(path_out, "high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut__past_clim_2025-05-28.csv")
 high_e_sce <- read.csv(Path)
-Path <- paste0(path_in, "low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut__past_clim_2025-05-28.csv")
+Path <- paste0(path_out, "low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut__past_clim_2025-05-28.csv")
 low_sig_high_e_sce <- read.csv(Path)
 
 # Arrange plots
