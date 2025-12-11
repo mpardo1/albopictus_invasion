@@ -9,12 +9,12 @@ You'll need the following data sets:
   - Human mobility data: Human mobility data between mobility areas in Spain (https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad). Run 0_extract_mob_data.R to obtain the daily human mobility averages. This will create two directories (od_flows/mitma_municip/) where it will save the data. Unzip the file (od_flows/mitma_municip/mean_daily_trips_apr_2023_nov_2023.csv.gz) after downloaded.
   - Past climate data: Download ERA5-Land via the Python API using: 01_download_ERA5LAnd.py. Before running it, create the directories temp and rain inside data. Ignore these directories from git to avoid problems with space limitation.
   - Future climate data: AEMET-CMIP6 Data for future climate change projections for Spain, downscaling data for Spain from the CMIP6 climate change projections data. To download the aemet-cmip6 data in the website (https://archivo-proyecciones-climaticas.aemet.es/) select the following:
-        - Dominio: Península y baleares (rejila 5km)
-        - Tipo de división: Región completa
-        - Región: Región completa
-        - Escenarios: SSP2-4.5 (ESD-RegBA) (in the previous version there were only one option for SSP2-4.5 now there are two different downscaling methods all information in: https://escenarios.adaptecca.es/doc/pnacc.pdf#page=12.42)
-        - Modelos: Ensemble completo (11 modelos)
-        - Variables: Choose each variable and download each.
+    - Dominio: Península y baleares (rejila 5km)
+    - Tipo de división: Región completa
+    - Región: Región completa
+    - Escenarios: SSP2-4.5 (ESD-RegBA) (in the previous version there were only one option for SSP2-4.5 now there are two different downscaling methods all information in: https://escenarios.adaptecca.es/doc/pnacc.pdf#page=12.42)
+    - Modelos: Ensemble completo (11 modelos)
+    - Variables: Choose each variable and download each.
 
   - Comarcas shapefile: Shapefile containing the geometries for the comarcas in Spain from the Goverment of Spain. Download the file from https://www.mapa.gob.es/es/cartografia-y-sig/ide/descargas/agricultura by clicking the blue coloured text "Archivo Shapefile de las Comarcas Agrarias de España (7,4 MB)"
   - Population density Spain: csv files with population density at municipio level for Spain from 1996 to 2024. Download it from https://www.ine.es/dynt3/inebase/es/index.htm?padre=525 clicking on the text "(Descargar archivo comprimido con los ficheros excel municipales de cada año a nivel nacional)" unzip the directory (pobmun.zip) in the data directory with the same name.
