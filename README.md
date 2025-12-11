@@ -16,7 +16,7 @@ You'll need the following data sets:
         - Modelos: Ensemble completo (11 modelos)
         - Variables: Choose each variable and download each.
 
-  . Comarcas shapefile: Shapefile containing the geometries for the comarcas in Spain from the Goverment of Spain. Download the file by clicking the blue coloured text "Archivo Shapefile de las Comarcas Agrarias de España (7,4 MB)"
+  . Comarcas shapefile: Shapefile containing the geometries for the comarcas in Spain from the Goverment of Spain. Download the file from https://www.mapa.gob.es/es/cartografia-y-sig/ide/descargas/agricultura by clicking the blue coloured text "Archivo Shapefile de las Comarcas Agrarias de España (7,4 MB)"
   . Population density Spain: csv files with population density at municipio level for Spain from 1996 to 2024. Download it from https://www.ine.es/dynt3/inebase/es/index.htm?padre=525 clicking on the text "(Descargar archivo comprimido con los ficheros excel municipales de cada año a nivel nacional)" unzip the directory (pobmun.zip) in the data directory with the same name.
   . Aedes albopictus detection data in Spain: csv file (File name: InvaMoSP_2004_2024.csv) with detection data for Aedes albopictus in Spain at municipio level. Website to download it: https://zenodo.org/records/15869763
 
