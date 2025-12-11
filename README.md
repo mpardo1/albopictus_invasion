@@ -26,6 +26,12 @@ When multiple files share the same number, their order is not important and they
 
 The only script that is not meant to be executed directly is funcR0.R, which is sourced by other R scripts.
 
+The code is structure in 4 main directories:
+  - 0_Weather_mob_process: This directory contains the script to download some data and the data process of the data for later use.
+  - 1_Hanski: This directory contains the R file (11_input_Hanski_com.R) to process the data for the future parameter estimation, and the julia codes to do the parameter estimation.
+  - 2_phase_space: This directory contains the two R files needed to compute the eigenvalues for different combination of the parameters and different scenarios.
+  - 3_Plots: This directory contains the different R files two produced the plots in the main and Supplementary material.
+    
 Before running any code that generates results, make sure you have downloaded all required datasets (all of them are publicly available). Instructions for downloading and saving each dataset are provided in the Data section of this Readme. Some datasets require running specific scripts. In particular, the first scripts to run are 0_extract_mob_data.R and 0_Weather_process/01_download_ERA5Land.py, which download the datasets that are not obtained manually.
 
 After this, run the remaining scripts in 0_Weather_mob_process (except 00_extract_mob_data.R and 01_download_ERA5Land.py), following the numerical order in their filenames. Remember to unzip the file data/od_flows/mitma_municip/mean_daily_trips_apr_2023_nov_2023.csv.gz, which is produced when running 0_Weather_mob_process/0_extract_mob_data.R. Then move to the 1_Hanski directory. Start with 11_input_Hanski_com.R, which creates the input files needed for the parameter estimation code written in Julia.  After that, run the parameter-estimation scripts whose names begin with 12_Param_estimation. These scripts require long execution times, so it is recommended to run them on a computing cluster, preferably with multiple threads. Once they finish, run the final two scripts in the 1_Hanski folder: 13_Full_model_sensitivity_analysis.jl, which performs the sensitivity analysis, and 13_future_integration.jl, which runs the future model integrations.
