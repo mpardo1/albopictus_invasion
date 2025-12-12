@@ -51,6 +51,15 @@ When multiple files share the same number, their order is not important and they
 
 The only script that is not meant to be executed directly is funcR0.R, which is sourced by other R scripts.
 
+Before running any code that generates results, make sure you have downloaded all required datasets (all of them are publicly available). Instructions for downloading and saving each dataset are provided in the Data section of this Readme. Some datasets require running specific scripts. In particular, the first scripts to run are 0_extract_mob_data.R and 0_Weather_process/01_download_ERA5Land.py, which download the datasets that are not obtained manually.
+
+After this, run the remaining scripts in 0_Weather_mob_process (except 00_extract_mob_data.R and 01_download_ERA5Land.py), following the numerical order in their filenames. Remember to unzip the file data/od_flows/mitma_municip/mean_daily_trips_apr_2023_nov_2023.csv.gz, which is produced when running 0_Weather_mob_process/0_extract_mob_data.R. Then move to the 1_Hanski directory. Start with 11_input_Hanski_com.R, which creates the input files needed for the parameter estimation code written in Julia.  After that, run the parameter-estimation scripts whose names begin with 12_Param_estimation. These scripts require long execution times, so it is recommended to run them on a computing cluster, preferably with multiple threads. Once they finish, run the final two scripts in the 1_Hanski folder: 13_Full_model_sensitivity_analysis.jl, which performs the sensitivity analysis, and 13_future_integration.jl, which runs the future model integrations.
+
+Next, run the scripts in the 2_phase_space directory. These files do not need to be run in any specific order, but they also require significant computation time and memory, so running them on a cluster is advised. These two files compute the eigenvalues for the different combination of parameters for section Control strategies and climate change scenarios in the main text of the manuscript.
+
+Finally, run the scripts in the 3_Plots directory. These generate all figures for the main text of the manuscript and the supplementary material.
+
+## Code description
 The code is structure in 4 main directories:
   - 0_Weather_mob_process: This directory contains the scripts for downloading climatic data, human mobility data, and regional boundaries, as well as processing them for later use.
       - 00_extract_mob_data.R: R code to download and extract human mobility data from the Spanish government website (explained in more detail in the Raw Data Sets section below), as well as to extract the files containing regional boundaries and their relationships.
@@ -77,10 +86,4 @@ The code is structure in 4 main directories:
       - 34_panel_4.R: R code to produces Figure 4 in the main text and Figure S9 Supplementary material.
       - 35_Supp_plots.R: R code to create remaining Supplementary figures.
     
-Before running any code that generates results, make sure you have downloaded all required datasets (all of them are publicly available). Instructions for downloading and saving each dataset are provided in the Data section of this Readme. Some datasets require running specific scripts. In particular, the first scripts to run are 0_extract_mob_data.R and 0_Weather_process/01_download_ERA5Land.py, which download the datasets that are not obtained manually.
 
-After this, run the remaining scripts in 0_Weather_mob_process (except 00_extract_mob_data.R and 01_download_ERA5Land.py), following the numerical order in their filenames. Remember to unzip the file data/od_flows/mitma_municip/mean_daily_trips_apr_2023_nov_2023.csv.gz, which is produced when running 0_Weather_mob_process/0_extract_mob_data.R. Then move to the 1_Hanski directory. Start with 11_input_Hanski_com.R, which creates the input files needed for the parameter estimation code written in Julia.  After that, run the parameter-estimation scripts whose names begin with 12_Param_estimation. These scripts require long execution times, so it is recommended to run them on a computing cluster, preferably with multiple threads. Once they finish, run the final two scripts in the 1_Hanski folder: 13_Full_model_sensitivity_analysis.jl, which performs the sensitivity analysis, and 13_future_integration.jl, which runs the future model integrations.
-
-Next, run the scripts in the 2_phase_space directory. These files do not need to be run in any specific order, but they also require significant computation time and memory, so running them on a cluster is advised. These two files compute the eigenvalues for the different combination of parameters for section Control strategies and climate change scenarios in the main text of the manuscript.
-
-Finally, run the scripts in the 3_Plots directory. These generate all figures for the main text of the manuscript and the supplementary material.
