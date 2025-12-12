@@ -27,7 +27,8 @@ Download the following data sets:
 
 ## Processed Data sets
 In this section we explain the processed files and how to download one file needed for the execution of the parameter estimation (code inside 1_Hanski), the phase space (code inside 2_phase_space) and to generate the figures (code inside 3_Plots) included in the main text and supplementary material of the manuscript. All the processed files are in the directory albopictus_invasion/data/output/. 
-The file that need to be download are (follow the steps in the Raw data sets Section above): Comarcas shapefile
+The file that need to be download are: Comarcas shapefile (follow the steps in the Raw data sets Section above).
+
 The processed files in the data/output/ folder are the following:
   - 3_rm_alb_ESP_com_0_2_v2.csv: data processed from the ERA5 Land data. It contains the daily average mosquito reproduction number from 01-01-2005 to 31-12-2023 for each comarca. The first column defines the date. The remaining columns contain the mosquito reproduction number for each comarca. The comarca ID is the number that appears after R0_alb. in each column name.
   - detection_albopictus.csv: csv  with the year of detection (year_detec) for Aedes albopictus for each municipality (NATCODE).
