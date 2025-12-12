@@ -1,5 +1,5 @@
 # Code that integrates the Hanski model to obtain the solutions 
-# With input: (from code input_Hanski.R)
+# With input: (from code albopictus_invasion/1_Hanski/11_input_Hanski_agg.R)
 #     . Flow matrix
 #     . R_M time series
 #     . t_min time series
@@ -45,92 +45,6 @@ R_M = CSV.read(path_out*"rm_alb_ESP_com_future.csv",DataFrame)
 R_M = R_M[year.(R_M.date) .< 2050,:]
 R_M = R_M[:, Not([1])]
 R_M = sort(R_M, :date)
-# Function to do the moving average and interpolate a time series ---------------------
-function interpolate_timeseries!(int_vec, df, window_size)
-  df = sort(df, :date)
-  # Select columns from the second to the second-to-last column, excluding the third column
-  df = df[:, Not([1])]
-
-  # Interpolate R_M
-  dfs = Matrix(df[:, 2:end])
-
-  # Initialize a day counter that starts at 1 for the first date
-  dates_num = Int[]  # Empty array to store day count values
-  previous_day = 1      # Starting point for day count
-
-  # Loop through the dates and calculate day counts
-  for i in 1:length(df.date)
-      if i == 1
-          push!(dates_num, 1)  # First date is day 1
-      else
-          # Calculate the difference in days from the previous date and add 15 for the 15th of the next month
-          push!(dates_num, previous_day + Dates.value(df.date[i] - df.date[i-1]))
-      end
-      previous_day = dates_num[end]  # Update the previous day to the current day's count
-  end
-
-  # Perform interpolation for each location
-  for i in 1:N
-      # Extract temperature values for the current location
-      dfs_val = dfs[:, i]
-
-      # Perform linear interpolation
-      itp = DataInterpolations.CubicSpline(dfs_val, dates_num, extrapolate = true)
-      # Store the interpolated function
-      int_vec[i] = itp
-
-      # plot(dates_num,dfs_val)
-  end
-end
-
-# Interpolate R_M --------------------------------------------------------------------
-# Create an array to store interpolated functions
-InterpType = DataInterpolations.CubicSpline{Vector{Float64},
- Vector{Int64},
- Vector{Int64}, Vector{Float64}, Float64}
-interpolated_functions = Vector{InterpType}(undef, N)
-interpolate_timeseries!(interpolated_functions, R_M, 1)
-
-# Compute dates num time
-dates_num = Int[]  # Empty array to store day count values
-previous_day = 1      # Starting point for day count
-
-# Loop through the dates and calculate day counts
-for i in 1:length(R_M.date)
-    if i == 1
-        push!(dates_num, 1)  # First date is day 1
-    else
-        # Calculate the difference in days from the previous date and add 15 for the 15th of the next month
-        push!(dates_num, previous_day +
-          Dates.value(R_M.date[i] - R_M.date[i-1]))
-    end
-    previous_day = dates_num[end]  # Update the previous day to the current day's count
-end
-
-# Test Interpolation
-using StatsPlots
-new_x = dates_num # Extract this from function interpolation
-p = plot(R_M.date, R_M[:,120], label = "Data")
-plot!(p,R_M.date, interpolated_functions[120].(new_x))
-plot(new_x, interpolated_functions[10].(new_x))
-
-# Interpolate Min temp --------------------------------------------------------------------
-# Read RM data time series
-tmin = CSV.read(path_out*"min_temp_ESP_future.csv",DataFrame)
-tmin = tmin[year.(tmin.date) .< 2050,:]
-tmin = tmin[:, Not([1])]
-tmin = sort(tmin, :date)
-# Interpolate RM and min temp. First create a global variable
-interpolated_functions_mint = Vector{InterpType}(undef, N)
-interpolate_timeseries!(interpolated_functions_mint, tmin, 1)
-print("After interpolation") 
-
-# Test Interpolation
-new_x = dates_num # Extract this from function interpolation
-p = plot(tmin.date, tmin[:,120], label = "Data")
-plot!(p,tmin.date, interpolated_functions_mint[120].(new_x))
-plot(dates_num, interpolated_functions_mint[120].(new_x))
-
 R_M.time .= dates_num
 
 # Compute average tmin and RM
@@ -205,7 +119,7 @@ sol = hanski_prediction(p)
 plot(sol)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
+filename = path_out*"com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
 
 # Scenarios human_mediated dispersal--------------------------------------------------------
@@ -216,7 +130,7 @@ sol = hanski_prediction(p)
 plot(sol)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
+filename = path_out*"low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
 
 # Scenarios high extinction --------------------------------------------------------
@@ -229,7 +143,7 @@ sol = hanski_prediction(p)
 plot(sol)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
+filename = path_out*"high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
 
 # Scenarios high extinction low human mediated--------------------------------------------------------
@@ -240,5 +154,5 @@ p[6:7] = 0.05.*p[6:7]
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
-filename = "low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
+filename = path_out*"low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))

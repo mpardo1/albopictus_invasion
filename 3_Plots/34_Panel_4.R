@@ -10,7 +10,7 @@ library(ggbreak)
 library(patchwork)
 
 # Path depending on location
-path_out <- "data/output/"
+path_out <- "data/output/" # Path to processed files
 path_plots <- "plots/" # Select a path to save the plots
 
 # Estimated parameters from the Parameter estimation from the Full model 12_Param_estimation_full_model.jl

@@ -1,12 +1,16 @@
+# Code to run the computation of the eigenvalues for the constant climate 
+# conditions needed to create Figure S9 in the Supplementary material
+# Remove everything before starting
 rm(list=ls())
+
+# Load packages
 library(data.table)
 library(ggplot2)
 library(dplyr)
 library(sf)
-library(ggbreak)
 library(tidyr)
 
-# Path depending on location
+# Path of the processed files
 path_out <- "data/output/"
 
 # Load data ------------------------------------------------------------
@@ -27,38 +31,11 @@ vec_RM <- matrix(0,N,N)
 diag(vec_RM) <- mean_RM
 
 # Save as Rds to plot
-saveRDS(mean_RM, "mean_RM_ESP.Rds")
+saveRDS(mean_RM, paste0(path_out, "mean_RM_ESP.Rds"))
 
-# Compute an average tmin 
-df_tmin_ESP <-read.csv(paste0(path_out,"min_temp_ESP.csv"))
-
-# Transform to minimum temp yearly
-df_tmin_ESP$date <- as.Date(df_tmin_ESP$date)
-
-# compute minimum year
-df_tmin_ESP <- df_tmin_ESP[,c(2:ncol(df_tmin_ESP))] %>%  
-  pivot_longer(cols = starts_with("X"),
-               names_to = "CO_COMARCA",
-               values_to = "value") %>% 
-  mutate(CO_COMARCA = as.integer(sub("^X", "", CO_COMARCA))) %>%
-  group_by(year(date), CO_COMARCA) %>% 
-  summarise(tmin = min(value))
-
-# Test
-colnames(df_tmin_ESP)[1] <- "year"
-ggplot(df_tmin_ESP[df_tmin_ESP$CO_COMARCA == df_tmin_ESP$CO_COMARCA[1],] ) +
-  geom_point(aes(year, tmin))+
-  geom_line(aes(year, tmin))
-
-# filter years
-min_pres <- df_tmin_ESP %>%  group_by(CO_COMARCA) %>% 
-  summarise(tmin_pres= mean(tmin))
-min_tmin <- min_pres$tmin_pres
-
-# Save as Rds to plot
-saveRDS(min_tmin, "min_tmin_ESP.Rds")
-# # wrrite csv
-# write.csv(min_tmin, "data/InputHanski/ESP/min_temp_yearly_mean_ESP.csv")
+# Load the average minimum temperature for the period 2005-2023
+min_tmin <- read.csv(paste0(path_out, "min_temp_yearly_mean_ESP.csv"))
+min_tmin <- min_tmin[,-1]
 
 # Estimated parameters
 param <- c(0.0005706731568571638, 97.78894801162286, 5424.950376421082,

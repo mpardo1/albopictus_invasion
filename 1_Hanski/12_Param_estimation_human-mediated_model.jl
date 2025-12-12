@@ -1,5 +1,5 @@
 # Code that performs the parameter estimation for the Human-mediated model
-# With input: (from code albo_mobility/code/Hanski/ESP/input_Hanski_agg.R)
+# With input: (from code albopictus_invasion/1_Hanski/11_input_Hanski_agg.R)
 #     . Flow matrix
 #     . Distance matrix
 #     . R_M time series
@@ -15,7 +15,6 @@ using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataI
  DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
  OptimizationPolyalgorithms, SciMLSensitivity, Zygote
 
-# Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
 path_out = "data/output/"
 
@@ -223,6 +222,7 @@ CSV.write(filename, results_df)
 p=[0.00019500768571673895, 0.1707553296090941, 6.355391841965978, -0.7581545344650137, -44.14554324330141]
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
+summer_avg_by_year = insertcols!(summer_avg_by_year, 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 filename = path_out*"output_estimation_hummob_meanrm__IC_2004_tmin_H_0_2_"*current_date*".csv"
 CSV.write(filename, DataFrame(summer_avg_by_year, :auto))

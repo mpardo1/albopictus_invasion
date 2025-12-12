@@ -1,4 +1,9 @@
+# Code to run the computation of the eigenvalues for the future climate change
+# conditions needed to create Figure 4 in the main text
+# Remove everything before starting
 rm(list=ls())
+
+# Load packages
 library(data.table)
 library(ggplot2)
 library(dplyr)
@@ -6,7 +11,7 @@ library(ggplot2)
 library(sf)
 library(tidyr)
 
-# Path depending on location
+# Path of the processed files
 path_out <- "data/output/"
 
 # Load data
@@ -30,7 +35,7 @@ vec_RM <- matrix(0,N,N)
 diag(vec_RM) <- mean_RM
 
 # Save as a Rds to plot
-saveRDS(mean_RM, "mean_RM_fut_ESP.Rds")
+saveRDS(mean_RM, paste0(path_out,"mean_RM_fut_ESP.Rds"))
 
 # Compute an average yearly minimum temp --------------------------------------------
 df_tmin_ESP <-read.csv(paste0(path_out,"min_temp_ESP_future.csv"))
@@ -57,7 +62,7 @@ min_fut <- df_tmin_ESP %>%  group_by(CO_COMARCA) %>%
 min_tmin <- min_fut$tmin
 
 # Save as a Rds to plot
-saveRDS(min_tmin, "min_temp_yearly_mean_fut_ESP.Rds")
+saveRDS(min_tmin, paste0(path_out, "min_temp_yearly_mean_fut_ESP.Rds"))
 
 ## save
 # write.csv(min_tmin, "data/InputHanski/ESP/min_temp_yearly_mean_fut_ESP.csv")
@@ -97,7 +102,7 @@ alp <- param[5]
 p=param
 size = 150
 
-# Run in Cluster -----------------------------------------------------------
+# Better to run in cluster to avoid memmory problems
 #  c1 vs ext -----------------------------------------------------------------
 x1 <- seq(0, 1, length.out = size)
 x2 <- seq(0, 0.2, length.out = size)

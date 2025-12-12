@@ -1,5 +1,5 @@
 # Code that performs the parameter estimation for the Climate drive model
-# With input: (from code albo_mobility/code/Hanski/ESP/input_Hanski_agg.R)
+# With input: (from code albopictus_invasion/1_Hanski/11_input_Hanski_agg.R)
 #     . Flow matrix
 #     . Distance matrix
 #     . R_M time series
@@ -7,7 +7,7 @@
 # And estimate the parameters of the model from the presence absence data
 # Download all pkgs -----------------------------------------------------
 import Pkg
-# Pkg.add("OrdinaryDiffEq")
+# Pkg.add("OrdinaryDiffEq") # running to install library 
 # Pkg.add("SciMLSensitivity")
 # Pkg.add("Zygote")
 
@@ -219,8 +219,17 @@ for i in 1:20
 
 end
 
-# Save results in a csv and filter erros -------------------------------------------------------
+# Save results in a csv -------------------------------------------------------
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 # Create the filename with the date 
 filename = path_out*"ESP_IC_2006_obs_2006-2023_com_mob1_tmin_"*current_date*".csv"
 CSV.write(filename, results_df)
+
+# Run model with fitted parameters
+p = [1.2554529426369034e-5,-0.11355578912262111,-6.804166056977577]
+sol = hanski_prediction(p)
+summer_avg_by_year = average_summer_solution_by_year(sol)
+summer_avg_by_year = insertcols!(summer_avg_by_year, 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
+current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
+filename = path_out*"output_estimation_pop_growth_meanRMtmin_H_0_2_"*current_date*".csv"
+CSV.write(filename, DataFrame(summer_avg_by_year, :auto))

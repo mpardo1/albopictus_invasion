@@ -1,6 +1,7 @@
 # Code that integrates the Hanski model to obtain the solutions 
-# With input: (from code input_Hanski.R)
+# With input: (from code albopictus_invasion/1_Hanski/11_input_Hanski_agg.R)
 #     . Flow matrix
+#     . Distance matrix
 #     . R_M time series
 #     . t_min time series
 # And estimate the parameters of the model from the presence absence data
@@ -11,8 +12,6 @@ using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataI
  DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
  OptimizationPolyalgorithms, SciMLSensitivity, Zygote, Random
 
-
-# Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
 path_out = "data/output/"
 
@@ -232,5 +231,5 @@ end
 # Save results in a csv and filter erros -------------------------------------------------------
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 # Create the filename with the date 
-filename = path_out*"obs_2004_sigmob_dist_RM_tmin_avg_"*current_date*".csv"
+filename = path_out*"sesitivity_analysis_0_01_"*current_date*".csv"
 CSV.write(filename, results_df)

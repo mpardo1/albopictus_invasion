@@ -1,6 +1,8 @@
 # Code to compute plots for panel 3 in the main manuscript
 # Remove everything before starting
 rm(list=ls())
+
+# Load packages
 library(data.table)
 library(ggplot2)
 library(tidyverse)
@@ -11,7 +13,7 @@ library(ggsci)
 library(mapSpain)
 
 # Data path
-path_out <- "data/output/"
+path_out <- "data/output/" # Path to processed files
 path_plots <- "plots/" # Select a path to save the plots
 
 # Run before anything -----------------------------------------

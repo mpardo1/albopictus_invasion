@@ -10,9 +10,10 @@ library(tidyverse)
 library(data.table)
 library(ggplot2)
 library(ggpubr)
+library(tidyr)
 
-# Data path
-path_out <- "data/output/"
+# Paths
+path_out <- "data/output/" # Path to processed files
 path_plots <- "plots/" # Select a path to save the plots
 
 # Load data --------------------------------------------------------------
@@ -32,7 +33,7 @@ esp_can <- esp_can[esp_can$ine.ccaa.name != "Ceuta" &
 # Add detection data
 pa <- read.csv(paste0(path_out,"detection_albopictus.csv")) 
 
-# Join  data sets to have geomtries
+# Join  data sets to have geometries
 pa$X <- NULL
 NATCODE_mitma_pa <- NATCODE_mitma_pa %>% left_join(pa)
 NATCODE_mitma_pa <- esp_can %>% left_join(NATCODE_mitma_pa)
@@ -73,15 +74,6 @@ flows_df <- comarcas %>% left_join(flows_df)
 
 # Map increase suitable days ESP 2004-2023 ------------------------------------
 df_clim_ESP <-read.csv(paste0(path_out,"3_rm_alb_ESP_com_0_2_v2.csv"))
-
-# Load data comarcas shapefile
-comarcas <- read_sf(paste0(path_out,"ComarcasAgrarias.shp"))
-comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
-                       comarcas$DS_CCAA != "Melilla" &
-                       comarcas$DS_CCAA != "Islas Baleares" &
-                       comarcas$DS_CCAA != "Canarias", ]
-# Load necessary library
-library(tidyr)
 
 # Convert from wide to long format
 df_clim_ESP <- df_clim_ESP %>%
@@ -200,6 +192,7 @@ gg1 <- ggarrange(plot_num_munis + theme(plot.margin = margin(20, 20, 20, 20, "pt
                  ncol = 2,nrow = 2, labels = c("a", "b", "c", "d"))
 gg1
 
+# Figure 1 main text of the manuscript
 ggsave(paste0(path_plots,"panel1_v1.png"),
        gg1, width =9.5, height = 7, dpi = 300)
 

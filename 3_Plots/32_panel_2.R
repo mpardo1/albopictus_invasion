@@ -1,6 +1,8 @@
 # Code to compute plots for panel 2 in the main manuscript
 # Remove everything before starting
 rm(list=ls())
+
+# Load packages
 library(data.table)
 library(ggplot2)
 library(tidyverse)
@@ -11,51 +13,15 @@ library(ggsci)
 library(mapSpain)
 
 # Data path
-path_out <- "data/output/"
+path_out <- "data/output/" # Path to processed files
 path_plots <- "plots/" # Select a path to save the plots
-
-# Plot LS all models from lowest to highest ------------------------------------
-# Least squared figure from data computed with code albo_mobility/code/Hanski/ESP/
-df_ls <- data.frame(Model_name = as.factor(c("Full Model", 
-                                             "Natural Dispersal",
-                                             "Human-mediated Dispersal",
-                                             "Climate-driven Growth")),
-                    Mobility =c("X", "-", "X","-"),
-                    Distance =c("X", "X", "-","-"),
-                    r_t =c("X", "X", "X", "X"),
-                    E_t =c("X",  "X", "X", "X"),
-                    S = c(431.27,523.39, 526.32, 828.97))
-
-# Create table with Least Squared values -------------------------------------
-library(ggpubr)
-
-# Create a custom theme with larger font size
-custom_theme <- ttheme(
-  "blank",
-  base_size = 14  # Adjust this value to increase/decrease font size
-)
-
-# Create table with the custom theme
-colnames(df_ls)[c(1,2,3,4:5)] <- c("Model","Human-Mediated \n dispersal","Natural dispersal","r(t)", "E(t)")
-
-tbl <- ggtexttable(df_ls, rows = NULL, theme = custom_theme) %>%
-  tab_add_hline(at.row = 1:2, row.side = "top", linewidth = 2) %>%
-  tab_add_hline(at.row = 5, row.side = "bottom", linewidth = 3, linetype = 1) %>%
-  ggpar(plot.margin = margin(10, 10, 10, 10))  # top, right, bottom, left
-
-
-# Print the table
-tbl
-
-# %>%
-#   tab_add_vline(at.column = 2, column.side = "right", linewidth = 3, linetype = 1)%>%
-#   tab_add_vline(at.column = 1, column.side = "left", linewidth = 3, linetype = 1)
 
 # Matrices simulation and observations -----------------------------
 Path <- paste0(path_out,"obs_2005-2023.csv")
 obs <- read.csv(Path)
 Path <- paste0(path_out,"output_mean_tminRM_H_0_2_IC_2004_2025-05-23.csv")
 sim_mat <- read.csv(Path)
+sim_mat <- sim_mat[,-1] # Remove ids comarcas
 Path <- paste0(path_out,"pa_com.csv")
 pa_com <- read.csv(Path)
 
@@ -72,9 +38,8 @@ df_sim <- df_sim %>%
   mutate(Year = as.integer(Year))  # Ensure Year is numeric
 
 # Convert to a data frame
-colnames(obs) <- 2005:2023 
+colnames(obs) <- c("CO_COMARCA", 2005:2023)
 df_obs <- as.data.frame(obs)
-df_obs$CO_COMARCA <- pa_com$CO_COMARCA # Add Comarca names as a column
 
 # Reshape from wide to long format
 library(tidyr)
@@ -108,9 +73,6 @@ bp <- ggplot(df_obs_sim,aes(as.factor(obs), sim, fill=as.factor(obs))) +
          axis.text.y = element_text(size = 15))
 bp
 
-mean(df_obs_sim[df_obs_sim$obs == 1,]$sim)
-quantile(df_obs_sim[df_obs_sim$obs == 1,]$sim)
-mean(df_obs_sim[df_obs_sim$obs == 0,]$sim)
 
 # Map with LS of all years ---------------------------------------------
 # Load data comarcas shapefile
@@ -315,9 +277,10 @@ ggarrange_tm
 # Test different models --------------------------------------------------
 plot_bp_map <- function(Path,year_n, pa_bool){
   # Matrices simulation and observations -----------------------------
-  Path_obs <- paste0(path_out,"obs_matrix_com.csv")
+  Path_obs <- paste0(path_out,"obs_2005-2023.csv")
   obs <- read.csv(Path_obs)
   sim_mat <- read.csv(Path)
+  sim_mat <- sim_mat[,-1]
   Path_pa <- paste0(path_out,"pa_com.csv")
   pa_com <- read.csv(Path_pa)
   
@@ -414,7 +377,7 @@ ESP_per <- st_union(ESP_per)
 # H=0.2 different fits ----------------------------------------------------
 # Try different models data from julia code: albo_mobility/code/Hanski/ESP/...jl
 year_n = 2023
-Path <- paste0(path_out,"output_mean_tminRM_H_0_2_IC_2004_2025-05-20.csv")
+Path <- paste0(path_out,"output_mean_tminRM_H_0_2_IC_2004_2025-05-23.csv")
 full_mod <- plot_bp_map(Path,year_n,1)
 full_mod[[1]]
 full_mod[[2]]

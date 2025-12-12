@@ -266,10 +266,6 @@ path <- paste0(path_in, "boundaries/ine_to_mitma_id_correspondence.csv") # File 
 ine_mitma <- read.csv(path)
 ine_mitma$id_ine <- as.character(ine_mitma$id_ine)
 
-# load  gpkg muni ine
-path <- paste0(path_in, "boundaries/ine_municip.gpkg") # File download from 0_extract_mob_data.R
-ine <- read_sf(path)
-
 # Load data albopictus detection -------------------------------------
 pa_alb <- read.csv2(paste0(path_in, "InvaMoSP_2004_2024.csv"), stringsAsFactors = FALSE)
 pa_alb <- pa_alb[,c("LAU2_COD", "ALB_YEAR_CTS", "ALB_YEAR_SPL")]
