@@ -57,7 +57,7 @@ NATCODE_mitma_pa$cum <- cumsum(NATCODE_mitma_pa$sum_munis)
 
 # Compute inflows and map  -------------------------------------------------------------
 # Load data comarcas shapefile
-comarcas <- read_sf(paste0(path_out,"ComarcasAgrarias.shp"))
+comarcas <- read_sf(paste0(path_out,"ComarcasAgrarias.shp")) # Download files (see details in readme Data Raw section)
 comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
                        comarcas$DS_CCAA != "Melilla" &
                        comarcas$DS_CCAA != "Islas Baleares" &

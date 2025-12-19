@@ -8,6 +8,8 @@ library(ggplot2)
 library(sf)
 library(ggbreak)
 library(patchwork)
+library(ggpubr)
+library(paletteer)
 
 # Path depending on location
 path_out <- "data/output/" # Path to processed files
@@ -21,29 +23,17 @@ m_c = 0.0051
 # c2 vs e2 -------------------------------------------------------------------
 # Read output Present
 path_pc <- paste0(path_out,"output_phase_space/")
-list_f <- list.files(path_pc, pattern = "ext_2")
+list_f <- list.files(path_pc, pattern = "pres")
 grid1_pres <- readRDS(paste0(path_pc, list_f[[1]]))
-grid2_pres <- readRDS(paste0(path_pc, list_f[[2]]))
-list_f <- list.files(path_pc, pattern = "ext_v")
-list_f <- list_f[list_f %like% "c1"]
-grid12_pres <- readRDS(paste0(path_pc, list_f[[1]]))
-grid1_pres <- rbind(grid1_pres,grid12_pres )
-list_f <- list.files(path_pc, pattern = "ext_v")
-list_f <- list_f[list_f %like% "cd"]
-grid22_pres <- readRDS(paste0(path_pc, list_f[[1]]))
-grid2_pres <- rbind(grid2_pres,grid22_pres )
 
 # Read output future
 list_f <- list.files(path_pc, pattern = "fut")
-grid1_fut <- readRDS(paste0(path_pc, list_f[list_f%like% "c1"]))
-grid2_fut <- readRDS(paste0(path_pc, list_f[list_f%like% "cd"]))
+grid1_fut <- readRDS(paste0(path_pc, list_f[[1]]))
 
 # Check numbers for MS
 (1-min(grid1_pres[grid1_pres$cte1 == 0 & grid1_pres$lambda_M >0, ]$cte2))*100
 (1-min(grid1_fut[grid1_fut$cte1 == 0 & grid1_fut$lambda_M >0, ]$cte2))*100
-  
-(1-min(grid2_pres[grid2_pres$cte1 == 0 & grid2_pres$lambda_M >0, ]$cte2))*100
-(1-min(grid2_fut[grid2_fut$cte1 == 0 & grid2_fut$lambda_M >0, ]$cte2))*100
+
 # Select colors
 blue = "#3F4C6B"#"#584B9F"#"#78A269"# "#585858"#"#4461A8"#"#26828E" #"#529985"
 low_blue =  "#E6D159"#"#00B4B5" #"#EABD4C" #"#C7C7C7"#"#E4F4FF"# "#D4CC49"
@@ -191,7 +181,6 @@ comarcas <- comarcas[comarcas$DS_CCAA != "Ceuta" &
 Path <- paste0(path_out, "pa_com.csv")
 pa_com <- read.csv(Path)
 
-
 # Spain perimeter
 library(mapSpain)
 ESP_per <- esp_get_ccaa_siane()
@@ -202,7 +191,7 @@ ESP_per <- st_union(ESP_per)
 # Process to long format
 proc_mat <- function(df_aux){
   # Convert to a data frame
-  colnames(df_aux) <- 2025:2049
+  colnames(df_aux)[2:ncol(df_aux)] <- 2025:2049
   df_aux <- as.data.frame(df_aux)
   df_aux$CO_COMARCA <- pa_com$CO_COMARCA
 
@@ -216,14 +205,8 @@ proc_mat <- function(df_aux){
 
 # Function to plot future scenarios
 plot_sce <- function(df_aux, year_n){
-  library(paletteer)
-  pal <- rev(paletteer_c("grDevices::Spectral", 14))
-  pal <- paletteer_c("grDevices::Geyser", 14)
-  # pal <- rev(paletteer_c("grDevices::RdYlBu", 30))
   pal <- paletteer_c("viridis::cividis", 14)
-  #pal <- paletteer_c("ggthemes::Temperature Diverging", 13)
   pal <- colorRampPalette(pal)
-  #colors <- paletteer::paletteer_c("ggthemes::Temperature Diverging", n=30)
   df_aux <- proc_mat(df_aux)
   # Join with shapefile
   plot_df <- comarcas %>% left_join(df_aux[df_aux$Year == year_n,])
@@ -241,17 +224,21 @@ plot_sce <- function(df_aux, year_n){
 }
 
 # Future scenarios
-Path <- paste0(path_out, "com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
+list_files <- list.files(path_out)
+file_n <- list_files[list_files %like% "com_opt_simulation_dits_sig_mob_tmin_RM_fut"][1]
+Path <- paste0(path_out, file_n )
 normal_sce <- read.csv(Path)
-Path <-   paste0(path_out, "low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
+file_n <- list_files[list_files %like% "low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"][1]
+Path <-   paste0(path_out, file_n)
 low_sig_sce <- read.csv(Path)
-Path <- paste0(path_out, "low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
+file_n <- list_files[list_files %like% "low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"][1]
+Path <- paste0(path_out, file_n)
 low_sig_high_e_sce <- read.csv(Path)
-Path <- paste0(path_out, "high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv")
+file_n <- list_files[list_files %like% "high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"][1]
+Path <- paste0(path_out, file_n)
 high_e_sce <- read.csv(Path)
 
 # Arrange plots
-library(ggpubr)
 year_n <- 2049
 
 maps_arr <- ggarrange(plot_sce(normal_sce,year_n) +

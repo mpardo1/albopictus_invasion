@@ -32,7 +32,7 @@ ESP_per <- st_union(ESP_per)
 
 # --------------------------------------------------------------
 # Plots RM 2023 -------------------------------------------------
-df_clim_ESP <-read.csv(paste0(path_out,"rm_alb_ESP_com.csv"))
+df_clim_ESP <-read.csv(paste0(path_out,"3_rm_alb_ESP_com_0_2_v2.csv"))
 df_clim_ESP <- df_clim_ESP[year(df_clim_ESP$date) == 2023,]
 
 # Convert to long format
@@ -60,7 +60,7 @@ suit_days <- ggplot(df_clim_ESP) +
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12))
 
-# Plot inflows prensece comarca 2023 --------------------------------------
+# Plot inflows comarca  --------------------------------------
 flows_df <- read.csv(paste0(path_out,"flows_com_df.csv"))
 flows_df$X <- NULL
 flows_df$CO_COMARCA <- flows_df$CO_COMARCA_origin
@@ -157,9 +157,6 @@ quiet<-list(xquiet, yquiet)
 
 # Palette
 library(paletteer)
-pal <- rev(paletteer_c("viridis::cividis", 14))
-pal <- paletteer_c("ggthemes::Blue-Green Sequential", 30)
-pal <- paletteer_c("grDevices::Blue-Yellow", 30)
 pal <- paletteer_c("grDevices::Viridis", 30)
 #pal <- paletteer_c("ggthemes::Temperature Diverging", 13)
 pal <- colorRampPalette(pal)
@@ -220,21 +217,6 @@ ggplot(dist_df_filt) +
   theme(legend.position = "top" ,
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12))
-
-# Plot distances histogram of neightbour geometries---------------------------
-dist_mat <- read.csv(paste0(path_out,"dist_mat_com_ESP.csv"))
-dist_mat <- dist_mat[,-1]
-
-# Compute neightbout distances
-dist_neight <- readRDS(paste0(path_out,"dist_neight.Rds"))
-
-# Join two distances
-dist_neight_cent <- data.frame(dist_neig = as.numeric(c(dist_neight)),
-                               dist_cent = c(as.matrix(dist_mat)))
-dist_neight_cent <- dist_neight_cent[dist_neight_cent$dist_cent != 0,] # Remove distance to itself
-ggplot(dist_neight_cent[dist_neight_cent$dist_neig==0,]) +
-  geom_density(aes(dist_cent), fill = "#69b3a2") +
-  theme_minimal() + xlab("Distance (m)")
 
 # Distance between "important" flows 
 flows_mat <- read.csv(paste0(path_out,"flows_apr_2023_nov_2023_mitma_ESP_com_v2.csv"))
@@ -399,93 +381,3 @@ ggsave(paste0(path_plots,"panel_sup_hum_mob.png"),
 ggsave(paste0(path_plots,"panel_sup_hum_mob.pdf"),
        height = 7, width = 13.5)
 
-# Media km distancias
-mean(as.numeric(c(dist_mat)))
-
-# Plot suitability 2023 ------------------------------------------------
-pa_com <- read.csv(paste0(path_out,"pa_com.csv"))[,-1]
-rm2 <- read.csv(paste0(path_out,"3_rm_alb_ESP_com.csv"))
-rm2 <- rm2[year(rm2$date) == 2023,-1]
-
-# Transform to long format
-rm2 <- rm2 %>%  
-  pivot_longer(
-    cols = starts_with("R0_alb."),
-    names_to = "CO_COMARCA",
-    names_prefix = "R0_alb.",
-    values_to = "RM"
-  )
-
-# Compute number of suitable days RM>1
-rm2$bool <- ifelse(rm2$RM >1, 1, 0)
-rm2_agg <- rm2 %>%  group_by(CO_COMARCA) %>% 
-  summarise(suit_days = sum(bool),
-            avg_rm = mean(RM))
-rm2_agg$CO_COMARCA <- as.integer(rm2_agg$CO_COMARCA)
-
-# Join with shapefile
-rm2_agg <- comarcas %>%  left_join(rm2_agg)
-suit_days <- ggplot(rm2_agg) + 
-  geom_sf(aes(fill = suit_days), alpha= 0.8, color = NA) +
-  geom_sf(data = ESP_per, color = "black", fill = NA) +
-  scale_fill_distiller(palette = "Spectral", name = "Suitable days\n ",
-                       limits = c(0,258),
-                       breaks = c(0,125,258)) +
-  theme_void() +
-  theme(legend.position = "top",
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 12))
-suit_days
-
-# Arrange plots
-ggarrange(plot_2023, suit_days)
-
-# Save the plot
-ggsave(paste0(path_plots,"suit_days_vs_full_model.png"),
-       dpi = 350, height =7 , width = 12)
-ggsave(paste0(path_plots,"suit_days_vs_full_model.pdf"),
-       height = 7, width = 12)
-
-# Maximum natural dispersal ------------------------------------------------------
-# Load data
-df_out_nat <- read.csv(paste0(path_out,"natural_dispersal_one_year_2025-05-28.csv"))
-dist_mat <- read.csv(paste0(path_out,"dist_mat_com_ESP.csv"))[,-1]
-
-# Extract first detection
-comarca_init <- df_out_nat[df_out_nat$out == 1,]$CO_COMARCA
-comarcas[comarcas$CO_COMARCA == comarca_init, ] # Test
-
-# Extract distance first detection
-which(df_out_nat$CO_COMARCA == comarca_init)
-dist_df_init <- data.frame(CO_COMARCA = df_out_nat$CO_COMARCA, dist = as.numeric(dist_mat[56,]))
-
-# Test
-dist_df_plot <- comarcas %>%  left_join(dist_df_init)
-df_out_nat_plot <- comarcas %>%  left_join(df_out_nat)
-ggplot(dist_df_plot) + geom_sf(aes(fill = dist))
-ggplot(df_out_nat_plot) + geom_sf(aes(fill = out))
-
-# Join probabilities and distance
-dist_out_df_plot <- df_out_nat %>% left_join(dist_df_init)
-
-# Quantiles
-q1 <- 4.392931e-1
-q2 <- 8.647432e-1
-q3 <- 9.96609e-1
-mean_prob <- 0.70
-
-# Quantiles
-quan <- quantile(df_out_nat$out, probs = c(0.75, 0.9,0.95,1))
-nrow(df_out_nat[df_out_nat$out>=quan[1],])
-hist(df_out_nat$out)
-
-# Compute distance
-days_disp <- 365
-max(dist_out_df_plot[dist_out_df_plot$out>=quan[2],]$dist)/(days_disp)
-max(dist_out_df_plot[dist_out_df_plot$out>=quan[3],]$dist)/(days_disp)
-max(dist_out_df_plot[dist_out_df_plot$out>=quan[4],]$dist)/(days_disp)
-max(dist_out_df_plot[dist_out_df_plot$out>=quan[4],]$dist)/(days_disp)
-max(dist_out_df_plot[dist_out_df_plot$out>=mean_prob,]$dist)/(days_disp)
-max(dist_out_df_plot[dist_out_df_plot$out>=q2,]$dist)/(days_disp)
-max(dist_out_df_plot[dist_out_df_plot$out>=q1,]$dist)/(days_disp)
-max(dist_out_df_plot[dist_out_df_plot$out>=0.5,]$dist)/(days_disp)

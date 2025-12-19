@@ -11,6 +11,8 @@ library(ggpubr)
 library(sf)
 library(ggsci)
 library(mapSpain)
+library(tidyr)
+library(dplyr)
 
 # Data path
 path_out <- "data/output/" # Path to processed files
@@ -31,8 +33,6 @@ df_sim <- as.data.frame(sim_mat)
 df_sim$CO_COMARCA <- pa_com$CO_COMARCA # Add Comarca names as a column
 
 # Reshape from wide to long format
-library(tidyr)
-library(dplyr)
 df_sim <- df_sim %>%
   pivot_longer(cols = -CO_COMARCA, names_to = "Year", values_to = "sim") %>%
   mutate(Year = as.integer(Year))  # Ensure Year is numeric
@@ -51,7 +51,6 @@ df_obs <- df_obs %>%
 # Join both data sets
 df_obs_sim <- df_obs %>%  left_join(df_sim)
 df_obs_sim$diff <- (df_obs_sim$obs-df_obs_sim$sim)^2
-sum(df_obs_sim$diff)  
 
 # Plot box plot
 # bp <- ggplot(out_df,aes(as.factor(PA), sim, fill = as.factor(PA))) +
@@ -72,7 +71,6 @@ bp <- ggplot(df_obs_sim,aes(as.factor(obs), sim, fill=as.factor(obs))) +
          axis.text.x = element_text(size = 15), # Change x-axis text size 
          axis.text.y = element_text(size = 15))
 bp
-
 
 # Map with LS of all years ---------------------------------------------
 # Load data comarcas shapefile
@@ -141,29 +139,28 @@ plot_2023 <- ggplot(out_df[out_df$Year == year_ref &  !is.na(out_df$Year ),]) +
         legend.text = element_text(size = 12))
 plot_2023
 
-
-# Save plots for GIFT
-for(i in c(2005:2023)){
-  print(paste0("i:",i))
-  year_ref <- 2023 #2out_df_centroidyear_ref <- 2022 #2012  #2023  # 2023
-  plot_aux <- ggplot(out_df[out_df$Year == i &  !is.na(out_df$Year ),]) + 
-    geom_sf(aes(fill = sim), alpha= 0.8) +
-    geom_sf(data = ESP_per, color = "black", fill = NA) +
-    # geom_sf(data = out_df_centroid, alpha= 0.8, size = 0.5) +
-    scale_fill_distiller(palette = "Spectral", name = "Probability \n",
-                         breaks = c(0,0.5,1),
-                         limits = c(0,1.001)) +
-    theme_void() +
-    ggtitle(paste0("Year:", i)) +
-    theme(legend.position = "top",
-          legend.title = element_text(size = 12),
-          legend.text = element_text(size = 12))
-  plot_aux
-  
-  # Save plots
-  ggsave(paste0(path_plots,"map_",i,".png"),
-         plot_aux, width = 8, height = 8, dpi = 250)
-}
+# # Save plots for GIFT
+# for(i in c(2005:2023)){
+#   print(paste0("i:",i))
+#   year_ref <- 2023 #2out_df_centroidyear_ref <- 2022 #2012  #2023  # 2023
+#   plot_aux <- ggplot(out_df[out_df$Year == i &  !is.na(out_df$Year ),]) + 
+#     geom_sf(aes(fill = sim), alpha= 0.8) +
+#     geom_sf(data = ESP_per, color = "black", fill = NA) +
+#     # geom_sf(data = out_df_centroid, alpha= 0.8, size = 0.5) +
+#     scale_fill_distiller(palette = "Spectral", name = "Probability \n",
+#                          breaks = c(0,0.5,1),
+#                          limits = c(0,1.001)) +
+#     theme_void() +
+#     ggtitle(paste0("Year:", i)) +
+#     theme(legend.position = "top",
+#           legend.title = element_text(size = 12),
+#           legend.text = element_text(size = 12))
+#   plot_aux
+#   
+#   # Save plots
+#   ggsave(paste0(path_plots,"map_",i,".png"),
+#          plot_aux, width = 8, height = 8, dpi = 250)
+# }
 
 # Plot the sigmoidal function -------------------------------------
 param <- c(0.0005706731568571639, 97.78894801162276, 5424.950376421077,
@@ -298,6 +295,7 @@ plot_bp_map <- function(Path,year_n, pa_bool){
   
   # Convert to a data frame
   obs <- read.csv(paste0(path_out,"obs_2005-2023.csv"))
+  obs <- obs[,-1]
   colnames(obs) <- 2005:2023 
   df_obs <- as.data.frame(obs)
   df_obs$CO_COMARCA <- pa_com$CO_COMARCA # Add Comarca names as a column
@@ -425,7 +423,6 @@ ggsave(paste0(path_out,"val_maps_all_models_meanRM_IC_2004.pdf"),
 # Path <- "/home/marta/Documentos/PHD/2024/Colonization/output/knockout_full_model_dispersal_2025-05-06.csv"
 # pop_growth <- plot_bp_map(Path,2023)
 # pop_growth[[2]]
-
 Path <- paste0(path_out,"output_mean_tminRM_H_0_2_nodist_IC_2004_2025-05-23.csv")
 nodist_mod <- plot_bp_map(Path,2023,0)
 nodist_mod[[2]]
@@ -503,7 +500,6 @@ m_c = 0.0051
 sigmoid <- function(x){param[1]/(1+exp(-param[2]*m_c*x+ param[3]))}
 sigmoid_hum <- function(x){param_hum[1]/(1+exp(-param_hum[2]*m_c*x+ param_hum[3]))}
 vec <- seq(10,100000,10)
-
 
 # Exponential function -------------------------------------------------
 texp <- function(x){param[4]*exp(-(1/param[5])*x)}
