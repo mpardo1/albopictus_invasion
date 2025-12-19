@@ -27,9 +27,9 @@ Download the following data sets:
   - Aedes albopictus detection data in Spain: csv file (File name: InvaMoSP_2004_2024.csv) with detection data for Aedes albopictus in Spain at municipality level. Website to download it: https://zenodo.org/records/15869763
 
 ### Processed Data sets
-In this section we explain the processed files and how to download one file needed for the execution of the parameter estimation (code inside 1_Hanski), the phase space (code inside 2_phase_space) and to generate the figures (code inside 3_Plots) included in the main text and supplementary material of the manuscript. All the processed files are in the directory albopictus_invasion/data/output/. 
+In this section, we describe the processed files required to run the parameter estimation (code in 1_Hanski), the phase space analysis (code in 2_phase_space), and the figure generation (code in 3_Plots) included in the main text and supplementary material of the manuscript. All processed files are located in the albopictus_invasion/data/output/ directory.
 
-The processed files in the data/output/ folder are the following:
+The processed files are the following:
   - ComarcasAgrarias.shp/shx/sbx/sbn/sbx/prj/dbf: All the files related to the Comarcas shapefile download from https://www.mapa.gob.es/es/cartografia-y-sig/ide/descargas/agricultura (see Raw Data sets Section above for more details) and owned by the Ministerio de Agricultura, Pesca y Alimentación from the Spanish Goverment.
   - 3_rm_alb_ESP_com_0_2_v2.csv: It contains the daily average mosquito reproduction number from 01-01-2005 to 31-12-2023 for each comarca. The first column defines the date. The remaining columns contain the mosquito reproduction number for each comarca. The comarca ID is the number that appears after R0_alb. in each column name.
   - comarca_mitma_NATCODE_ESP.csv: data processed from the Spanish Goverment boundaries data. It contains the relationship between the ids of the different regions in Spain (to be able to join different data sets), the id for the comarcas (CO_COMARCA), the id for the mobility regions (id_mitma), the id for the municipalities in Spain (NATCODE).
