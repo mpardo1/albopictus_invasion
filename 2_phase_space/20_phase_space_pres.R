@@ -24,8 +24,8 @@ diag(dist) <- 0
 
 # Compute an average RM
 df_clim_ESP <-read.csv(paste0(path_out,"3_rm_alb_ESP_com_0_2_v2.csv"))
-mean_RM <- colSums(df_clim_ESP[,c(3:ncol(df_clim_ESP))])/nrow(df_clim_ESP)
-max_RM <- apply(df_clim_ESP[,c(3:ncol(df_clim_ESP))], 2,max)
+mean_RM <- colSums(df_clim_ESP[,c(2:ncol(df_clim_ESP))])/nrow(df_clim_ESP)
+max_RM <- apply(df_clim_ESP[,c(2:ncol(df_clim_ESP))], 2,max)
 N = nrow(eta)
 vec_RM <- matrix(0,N,N)
 diag(vec_RM) <- mean_RM
@@ -44,7 +44,7 @@ m_c = 0.0051
 
 # Metapopulation capacity -------------------------------------------------------
 
-# Function to savely compute exponentials without Float digit limit
+# Function to savely compute exponential without Float digit limit
 safe_exp <- function(x,  lower = -700,upper= 700){
   x_clipped <- pmin(pmax(x,lower), upper)
   exp(x_clipped)
@@ -97,18 +97,15 @@ ggplot(grid_df) +
   # geom_point(aes(cte1,cte2,color = as.factor(sign(lambda_M))))
   geom_point(aes(cte1,cte2,color = as.factor(sign(lambda_M))))
 
-# Save data frame# Save data framelambda_M_func()
-saveRDS(grid_df, paste0(path_out,"phase_space_dist_c1_vs_ext_v2",Sys.Date(),".Rds"))
-
-#  cd vs ext -----------------------------------------------------------------
-size = 150
+grid1_df <- grid_df # rename to use later
+#  c1 vs ext -----------------------------------------------------------------
 x1 <- seq(0, 1, length.out = 100)
-x2 <- seq(0, 0.1, length.out = 100)
+x2 <- seq(0, 0.2, length.out = 100)
 grid_df <- setDT(expand.grid(cte1 = x1, cte2 = x2))
-grid_df$c1 <- p[1]
+grid_df$c1 <- p[1]*grid_df$cte1
 grid_df$c2 <- p[2]
 grid_df$c3 <- p[3]
-grid_df$cd <- p[4]*grid_df$cte1
+grid_df$cd <- p[4]
 grid_df$alp <- p[5]
 grid_df$e1 <- p[6]*grid_df$cte2
 grid_df$e2 <- p[7]*grid_df$cte2
@@ -118,7 +115,7 @@ grid_df[,lambda_M := mapply(lambda_M_func, c1,c2,c3,cd,alp,e1,e2)]
 
 ggplot(grid_df) +
   # geom_point(aes(cte1,cte2,color = as.factor(sign(lambda_M))))
-  geom_point(aes(cte1,cte2,color = lambda_M)) 
+  geom_point(aes(cte1,cte2,color = as.factor(sign(lambda_M))))
 
 # Save data frame# Save data framelambda_M_func()
-saveRDS(grid_df, paste0(path_out,"phase_space_dist_cd_vs_ext_v3",Sys.Date(),".Rds"))
+saveRDS(rbind(grid_df,grid1_df), paste0(path_out,"output_phase_space/phase_space_dist_c1_vs_pres_",Sys.Date(),".Rds"))
