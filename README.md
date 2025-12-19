@@ -13,7 +13,8 @@ Download the following data sets:
     - ine_to_mitma_id_correspondence.csv: csv with the relationship between mobility areas ids (id_mitma) and the Spanish administrative units (id_ine).
   - Human mobility data: Human mobility data between mobility areas in Spain (https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad). Run 0_extract_mob_data.R to obtain the daily human mobility averages. This will create two directories (od_flows/mitma_municip/) where it will save the data. Unzip the file (od_flows/mitma_municip/mean_daily_trips_apr_2023_nov_2023.csv.gz) after downloaded.
   - Past climate data: Download ERA5-Land via the Python API using: 01_download_ERA5LAnd.py. Before running it, create the directories temp and rain inside data. Ignore these directories from git to avoid problems with space limitation.
-  - Future climate data: AEMET-CMIP6 Data for future climate change projections for Spain, downscaling data for Spain from the CMIP6 climate change projections data. Download the data and move it to the folder albopictus_invasion/data/aemet-cmip6/. To download the aemet-cmip6 data in the website (https://archivo-proyecciones-climaticas.aemet.es/) select the following:
+  - Future climate data: AEMET-CMIP6 data provide future climate change projections for Spain, based on downscaled CMIP6 climate model outputs. Create a directory named aemet-cmip6 inside albopictus_invasion/data/. Download the data and move the files to the folder albopictus_invasion/data/aemet-cmip6/. To download the AEMET-CMIP6 data from the website
+(https://archivo-proyecciones-climaticas.aemet.es/), select the following options:
     - Dominio: Península y baleares (rejila 5km)
     - Tipo de división: Región completa
     - Región: Región completa
