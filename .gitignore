@@ -3,4 +3,7 @@
 .RData
 .Ruserdata
 
-data/
+data/od_flows/
+data/pobmun/
+data/ignore/
+data/boundaries/
