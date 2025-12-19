@@ -1,11 +1,11 @@
 ## Code for the paper: Understanding Mosquito Vector Invasion Pathways: Synergistic Effects of Human Mobility, Climate, and Natural Dispersal
 This repository contains code used to produce the results and figures for the paper: "Understanding Mosquito Vector Invasion Pathways: Synergistic Effects of Human Mobility, Climate, and Natural Dispersal".
 
-# Data
+## Data
 This section explains how to download the raw data sets. We also provide several processed data files (Processed Data sets Section) that allow parts of the code to be run directly. Downloading and processing some of the raw files can be computationally expensive in terms of execution time and memory usage; therefore, the processed files are included to make the workflow more efficient.
 
-## Raw data sets
-To run the entire code from the beginning (without using the processed files described bellow) without changing any paths in the albopictus_invasion code, create a folder named data/ inside albopictus_invasion and follow the instructions below:
+### Raw data sets
+To run the entire code from the beginning (without using the processed files described below) and without changing any paths in the albopictus_invasion repository, download the data, following each point bellow, and save all data sets in the albopictus_invasion/data/ folder:
 
 Download the following data sets:
   - Boundaries relationship: A set of administrative boundaries for Spain used to join different datasets. Run 0_extract_mob_data.R. This automatically downloads all necessary boundary datasets from the Government of Spain and saves them under: data/boundaries/. The datasets are the following:
@@ -13,7 +13,7 @@ Download the following data sets:
     - ine_to_mitma_id_correspondence.csv: csv with the relationship between mobility areas ids (id_mitma) and the Spanish administrative units (id_ine).
   - Human mobility data: Human mobility data between mobility areas in Spain (https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad). Run 0_extract_mob_data.R to obtain the daily human mobility averages. This will create two directories (od_flows/mitma_municip/) where it will save the data. Unzip the file (od_flows/mitma_municip/mean_daily_trips_apr_2023_nov_2023.csv.gz) after downloaded.
   - Past climate data: Download ERA5-Land via the Python API using: 01_download_ERA5LAnd.py. Before running it, create the directories temp and rain inside data. Ignore these directories from git to avoid problems with space limitation.
-  - Future climate data: AEMET-CMIP6 Data for future climate change projections for Spain, downscaling data for Spain from the CMIP6 climate change projections data. To download the aemet-cmip6 data in the website (https://archivo-proyecciones-climaticas.aemet.es/) select the following:
+  - Future climate data: AEMET-CMIP6 Data for future climate change projections for Spain, downscaling data for Spain from the CMIP6 climate change projections data. Download the data and move it to the folder albopictus_invasion/data/aemet-cmip6/. To download the aemet-cmip6 data in the website (https://archivo-proyecciones-climaticas.aemet.es/) select the following:
     - Dominio: Península y baleares (rejila 5km)
     - Tipo de división: Región completa
     - Región: Región completa
@@ -25,7 +25,7 @@ Download the following data sets:
   - Population density Spain: csv files with population density at municipality level for Spain from 1996 to 2024. Download it from https://www.ine.es/dynt3/inebase/es/index.htm?padre=525 clicking on the text "(Descargar archivo comprimido con los ficheros excel municipales de cada año a nivel nacional)" unzip the directory (pobmun.zip) in the data directory with the same name.
   - Aedes albopictus detection data in Spain: csv file (File name: InvaMoSP_2004_2024.csv) with detection data for Aedes albopictus in Spain at municipality level. Website to download it: https://zenodo.org/records/15869763
 
-## Processed Data sets
+### Processed Data sets
 In this section we explain the processed files and how to download one file needed for the execution of the parameter estimation (code inside 1_Hanski), the phase space (code inside 2_phase_space) and to generate the figures (code inside 3_Plots) included in the main text and supplementary material of the manuscript. All the processed files are in the directory albopictus_invasion/data/output/. 
 
 The processed files in the data/output/ folder are the following:
@@ -54,7 +54,7 @@ The processed files in the data/output/ folder are the following:
   - low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv: it contains future predictions under climate change projections for control strategy b figure 4 main text. The first column define the id comarca (CO_COMARCA) and the following columns define the summer mean occupancy probability for each year, the year is the name of the column.
   - com_opt_simulation_dits_sig_mob_tmin_RM_fut_2025-05-27.csv: it contains future predictions under climate change projections for control strategy a figure 4 main text. The first column define the id comarca (CO_COMARCA) and the following columns define the summer mean occupancy probability for each year, the year is the name of the column.
   - min_temp_yearly_mean_fut_ESP.csv: vector with average minimum yearly temperature for the future climate change projection from 2025 to 2050 for each comarca.
-# Code
+## Code
 The code should be run following the numbering in the directories and then the filenames. The file names contains two numbers, the first number indicates the directory and the second number gives the order within that directory. For example, the file 20_phase_space_future.R belongs to the directory 2_phase_space and should be run after all files in 0_Weather_mob_process and 1_Hanski have been completed, the 0 indicates that it is the first script to run within its own directory.
 When multiple files share the same number, their order is not important and they can be run in any sequence.
 
@@ -68,7 +68,7 @@ Next, run the scripts in the 2_phase_space directory. These files do not need to
 
 Finally, run the scripts in the 3_Plots directory. These generate all figures for the main text of the manuscript and the supplementary material.
 
-## Code description
+### Code description
 The code is structure in 4 main directories:
   - 0_Weather_mob_process: This directory contains the scripts for downloading climatic data, human mobility data, and regional boundaries, as well as processing them for later use.
       - 00_extract_mob_data.R: R code to download and extract human mobility data from the Spanish government website (explained in more detail in the Raw Data Sets section below), as well as to extract the files containing regional boundaries and their relationships.
