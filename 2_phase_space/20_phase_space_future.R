@@ -1,5 +1,7 @@
 # Code to run the computation of the eigenvalues for the future climate change
 # conditions needed to create Figure 4 in the main text
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in line 17
+
 # Remove everything before starting
 rm(list=ls())
 

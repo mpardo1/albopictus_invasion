@@ -4,6 +4,8 @@
 #     . R_M time series
 #     . t_min time series
 # And estimate the parameters of the model from the presence absence data
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in line 20
+
 # Load pkgs -----------------------------------------------------
 import Pkg
 # Pkg.add("OrdinaryDiffEq")

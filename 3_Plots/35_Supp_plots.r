@@ -1,4 +1,6 @@
 # Code to compute plots for the Supplementary
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in line 20
+
 # Remove everything before starting
 rm(list=ls())
 

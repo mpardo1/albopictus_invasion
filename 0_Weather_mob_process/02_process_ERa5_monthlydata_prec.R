@@ -1,5 +1,7 @@
 # Code to read raster data ERA5 land:
 #https://cds.climate.copernicus.eu/cdsapp#!/dataset/eu.copernicus.climate.reanalysis-era5-land?tab=overview
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 14,15
+
 # Load pkgs and remove data -----------------------------------------------------
 rm(list = ls())
 library(data.table)

@@ -1,4 +1,6 @@
 # Code to read raster data ERA5 land and compute yearly minimum temperature
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 14 and 15
+
 # Load pkgs and remove data -----------------------------------------------------
 rm(list = ls())
 library(data.table)

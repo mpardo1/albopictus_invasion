@@ -1,4 +1,6 @@
 # Code to reproduce figure 4 main and figure S9 Supplementary material
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 17 and 18
+
 # Remove everything before starting
 rm(list=ls())
 library(data.table)

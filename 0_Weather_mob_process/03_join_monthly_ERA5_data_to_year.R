@@ -1,5 +1,10 @@
 # Code to join monthly processed data from ERA5 Land from the two files in the 0_Weather_mob_process directory with name starting with 02_process_ERa5_monthly...
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 15
+
+# Remove everything in the environment.
 rm(list = ls())
+
+# Load libraries
 library(data.table)
 library(ggplot2)
 library(terra)

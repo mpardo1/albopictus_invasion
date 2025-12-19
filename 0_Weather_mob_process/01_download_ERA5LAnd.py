@@ -1,5 +1,7 @@
 # Code to download data from the API for https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land?tab=overview
 # To setup the computer to run the code follow the steps in https://cds.climate.copernicus.eu/how-to-api
+# Make sure you are within the albopictus_invasion directory if not change the path, line 52, adding the path to the albopictus_invasion folder.
+
 import cdsapi
 
 c = cdsapi.Client()
@@ -46,7 +48,7 @@ for year in years:
             "download_format": "unarchived",
             "area": [80, -30, 30, 50]
         }
-
+        
         target = "data/rain/ERA5_EU_hourly_prec" + month +  year + ".grib"
         # target = "data/temp/ERA5_EU_hourly_prec" + month +  year + ".grib"
         c.retrieve(dataset, request, target)

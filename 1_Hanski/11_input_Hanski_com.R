@@ -1,4 +1,6 @@
 # Code to obtain the input data sets for the parameter estimation code in julia
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 19 and 20
+
 # Remove all variables in the R environment
 rm(list=ls())
 

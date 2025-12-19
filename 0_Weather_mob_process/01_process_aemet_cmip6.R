@@ -1,5 +1,6 @@
 # scripts to process the data from aemet-cmip6 data for spain at a 
-# 5 km grid. 
+# 5 km grid. Check the Raw data sets Section in the README file to understand how to download the data.
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 16, 17, 18
 # remove everything in the working directory
 rm(list = ls())
 

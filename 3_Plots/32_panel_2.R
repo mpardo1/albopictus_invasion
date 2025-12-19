@@ -1,4 +1,6 @@
 # Code to compute plots for panel 2 in the main manuscript
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 20 and 21.
+
 # Remove everything before starting
 rm(list=ls())
 

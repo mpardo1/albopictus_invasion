@@ -1,4 +1,6 @@
-# Code to read raster data ERA5 land
+# Code to read raster and process data 2 metres temperature data from ERA5 land 
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in lines 13 and 14
+
 # Load pkgs and remove data -----------------------------------------------------
 rm(list = ls())
 library(data.table)

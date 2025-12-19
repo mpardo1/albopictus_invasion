@@ -1,5 +1,7 @@
 # Code to run the computation of the eigenvalues for the constant climate 
 # conditions needed to create Figure S9 in the Supplementary material
+# To run the code be on the albopictus_invasion directory if not change path adding the path to albopictus_invasion directory in line 16
+
 # Remove everything before starting
 rm(list=ls())
 
