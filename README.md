@@ -2,10 +2,10 @@
 This repository contains code used to produce the results and figures for the paper: "Understanding Mosquito Vector Invasion Pathways: Synergistic Effects of Human Mobility, Climate, and Natural Dispersal".
 
 # Data
-Here is the explanation of how to download the raw data sets. We have also added several processed data files to allow you to run parts of the code directly. Downloading and processing some of the raw files is very costly in terms of execution time and memory, so the processed files are provided to make the workflow more efficient.
+This section explains how to download the raw data sets. We also provide several processed data files (Processed Data sets Section) that allow parts of the code to be run directly. Downloading and processing some of the raw files can be computationally expensive in terms of execution time and memory usage; therefore, the processed files are included to make the workflow more efficient.
 
 ## Raw data sets
-To run the entire code from the beginning (without using the processed files described above) without changing any paths in the albopictus_invasion code, create a folder named data/ inside albopictus_invasion and follow the instructions below:
+To run the entire code from the beginning (without using the processed files described bellow) without changing any paths in the albopictus_invasion code, create a folder named data/ inside albopictus_invasion and follow the instructions below:
 
 Download the following data sets:
   - Boundaries relationship: A set of administrative boundaries for Spain used to join different datasets. Run 0_extract_mob_data.R. This automatically downloads all necessary boundary datasets from the Government of Spain and saves them under: data/boundaries/. The datasets are the following:
