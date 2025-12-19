@@ -1,19 +1,5 @@
 # scripts to process the data from aemet-cmip6 data for spain at a 
 # 5 km grid. 
-######################## DOWNLOAD DATA #############################
-# To download the aemet-cmip6 data in the website (https://archivo-proyecciones-climaticas.aemet.es/) select the following:
-#   - Dominio: Península y baleares (rejila 5km)
-#   - Tipo de división: Región completa
-#   - Región: Región completa
-#   - Escenarios: SSP2-4.5 (ESD-RegBA) (in the previous version there were only one option for SSP2-4.5 now there are two different downscaling methods all information in: https://escenarios.adaptecca.es/doc/pnacc.pdf#page=12.42)
-#   - Modelos: Ensemble completo (11 modelos)
-#   - Variables: Choose each variable and download each.
-
-# Download shapefile comarcas from https://www.mapa.gob.es/es/cartografia-y-sig/ide/descargas/agricultura/default.aspx
-# Download the file by clicking the blue coloured text "Archivo Shapefile de las Comarcas Agrarias de España (7,4 MB)"
-
-# Download data albopictus detection (File name: InvaMoSP_2004_2024.csv) data https://zenodo.org/records/15869763
-####################################################################3
 # remove everything in the working directory
 rm(list = ls())
 
@@ -26,8 +12,8 @@ library(mapSpain)
 library(sf)
 
 # Paths -----------------------------------------------------------
-path_dir_cmip6 <- "data/aemet-cmip6/"  # Directory with row aemet-cmip6 data download from the website, details at the beginning of the script.
-path_in <- "data/" # Path with the rest of the data download
+path_dir_cmip6 <- "data/aemet-cmip6/"  # Directory with row aemet-cmip6 data download from the website, details in the readme Data raw section
+path_in <- "data/" # Path with the rest of the raw data download
 path_out <- "data/output/"  # Directory where the processed data will be store for later use.
 
 # function to process the aemet-cmip6 data ------------------------
