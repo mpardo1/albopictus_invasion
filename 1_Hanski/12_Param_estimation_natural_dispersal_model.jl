@@ -49,8 +49,7 @@ time_IC = R_M[R_M.date .== Date(string(year_ic)*"-08-15", "yyyy-mm-dd"),:].time
 time_end = R_M.time[end]
 
 # Compute average tmin and RM
-R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
-tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
+R_M_mean = vec(sum(Matrix(R_M[:,2:(end-1)]), dims = 1)/size(R_M,1))
 
 # Load yearly tmin
 tmin_min = CSV.read(path_out*"min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
@@ -214,7 +213,8 @@ end
 p =[0.0005639646833044143, 32553.774005521933, -0.18821772990171218, -8.597835989480085]
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
-summer_avg_by_year = insertcols!(summer_avg_by_year, 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
+summer_avg_by_year = insertcols!(DataFrame(summer_avg_by_year, :auto), 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
+names(summer_avg_by_year)[2:end] .= string.(2005:2023) # Add years as name columns
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 filename = path_out*"output_estimation_dist_meanRM_tmin_H_0_2_"*current_date*".csv"
-CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
+CSV.write(filename, summer_avg_by_year)

@@ -10,9 +10,8 @@ import Pkg
 # Pkg.add("SciMLSensitivity")
 # Pkg.add("Zygote")
 
-using DifferentialEquations,  DataFrames,  CSV, Plots, LinearAlgebra, ODE, DataInterpolations,
- DiffEqParamEstim, Optimization,  Statistics, Dates,ForwardDiff, OptimizationOptimJL, OptimizationBBO, OrdinaryDiffEq,
- OptimizationPolyalgorithms, SciMLSensitivity, Zygote, Dates
+using DifferentialEquations,  DataFrames,  CSV, LinearAlgebra, ODE, 
+ DiffEqParamEstim,  Statistics, Dates, Plots
 
 # Input data for this model in 1_Hanski/11_input_Hanski_agg.R
 # Choose location
@@ -45,11 +44,10 @@ R_M = CSV.read(path_out*"rm_alb_ESP_com_future.csv",DataFrame)
 R_M = R_M[year.(R_M.date) .< 2050,:]
 R_M = R_M[:, Not([1])]
 R_M = sort(R_M, :date)
-R_M.time .= dates_num
+R_M.time .= Dates.value.((R_M.date .- first(R_M.date)) .+ Day(1))
 
 # Compute average tmin and RM
-R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
-tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
+R_M_mean = vec(sum(Matrix(R_M[:,2:(end-1)]), dims = 1)/size(R_M,1))
 
 # Load yearly tmin
 tmin_min = CSV.read(path_out*"min_temp_yearly_mean_fut_ESP.csv",DataFrame)[:,3]
@@ -69,8 +67,8 @@ function fun_na!(du, u, p, t)
 # @benchmark fun_na!($Vector{Float64}(undef,N), $pop_init, $p, 1)
 
 # Set initial parameters ------------------------------------------------------------------
-t0= dates_num[1] 
-tf= dates_num[end] - 100
+t0= R_M.time[1] 
+tf= R_M.time[end] - 100
 tspan = (t0, tf)
 t_vect=1:tf
 u0 = pop_init
@@ -116,22 +114,24 @@ end
 p = [0.0005706731568571676, 97.78894801161957, 5424.950376420903,
 6.97762397002697e-5, 51314.7750145224, -6.874687389443576, -80.94731156667044]
 sol = hanski_prediction(p)
-plot(sol)
 summer_avg_by_year = average_summer_solution_by_year(sol)
+summer_avg_by_year = insertcols!(DataFrame(summer_avg_by_year, :auto), 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
+names(summer_avg_by_year)[2:end] .= string.(2025:2100) # Add years as name columns
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 filename = path_out*"com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
-CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
+CSV.write(filename,summer_avg_by_year)
 
 # Scenarios human_mediated dispersal--------------------------------------------------------
 p = [0.01*0.0005706731568571676, 97.78894801161957, 5424.950376420903,
 6.97762397002697e-5, 51314.7750145224, -6.874687389443576, -80.94731156667044]
 # Compute solution
 sol = hanski_prediction(p)
-plot(sol)
 summer_avg_by_year = average_summer_solution_by_year(sol)
+summer_avg_by_year = insertcols!(DataFrame(summer_avg_by_year, :auto), 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
+names(summer_avg_by_year)[2:end] .= string.(2025:2100) # Add years as name columns
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 filename = path_out*"low_sig_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
-CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
+CSV.write(filename, summer_avg_by_year)
 
 # Scenarios high extinction --------------------------------------------------------
 p = [0.0005706731568571676, 97.78894801161957, 5424.950376420903,
@@ -140,11 +140,12 @@ p[6:7] = 0.05.*p[6:7]
 
 # Compute solution
 sol = hanski_prediction(p)
-plot(sol)
 summer_avg_by_year = average_summer_solution_by_year(sol)
+summer_avg_by_year = insertcols!(DataFrame(summer_avg_by_year, :auto), 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
+names(summer_avg_by_year)[2:end] .= string.(2025:2100) # Add years as name columns
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 filename = path_out*"high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
-CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
+CSV.write(filename, summer_avg_by_year)
 
 # Scenarios high extinction low human mediated--------------------------------------------------------
 p = [0.01*0.0005706731568571676, 97.78894801161957, 5424.950376420903,
@@ -153,6 +154,8 @@ p[6:7] = 0.05.*p[6:7]
 # Compute solution
 sol = hanski_prediction(p)
 summer_avg_by_year = average_summer_solution_by_year(sol)
+summer_avg_by_year = insertcols!(DataFrame(summer_avg_by_year, :auto), 1, :CO_COMARCA=> pa_com.CO_COMARCA) # Add CO_COMARCA ID
+names(summer_avg_by_year)[2:end] .= string.(2025:2100) # Add years as name columns
 current_date = Dates.format(Dates.today(), "yyyy-mm-dd")
 filename = path_out*"low_sig_high_e_factor_com_opt_simulation_dits_sig_mob_tmin_RM_fut_"*current_date*".csv"
-CSV.write(filename, DataFrame(summer_avg_by_year, :auto))
+CSV.write(filename, summer_avg_by_year)

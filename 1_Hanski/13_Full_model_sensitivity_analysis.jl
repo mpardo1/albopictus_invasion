@@ -50,8 +50,7 @@ time_end = R_M.time[end]
 tmin = CSV.read(path_out*"min_temp_ESP.csv",DataFrame)
 
 # Compute average tmin and RM
-R_M_mean = vec(sum(Matrix(R_M[:,3:(end-1)]), dims = 1)/size(R_M,1))
-tmin_mean = vec(sum(Matrix(tmin[:,3:(end)]), dims = 1)/size(tmin,1))
+R_M_mean = vec(sum(Matrix(R_M[:,2:(end-1)]), dims = 1)/size(R_M,1))
 
 # Load yearly tmin
 tmin_min = CSV.read(path_out*"min_temp_yearly_mean_ESP.csv",DataFrame)[:,2]
