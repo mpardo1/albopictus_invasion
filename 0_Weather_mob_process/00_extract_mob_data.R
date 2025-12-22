@@ -70,7 +70,7 @@ relevant_files <- unique(files_dt[
 ])
 
 
-# check total size of all downloaded files, shoul be about 29 Gb
+# check total size of all downloaded files, should be about 29 Gb
 stopifnot(round(sum(file.size(relevant_files)) / 1024^3, 0) == 29)
 # check the number of csv gz files, should be 237 files
 stopifnot(length(file.exists(relevant_files)) == 237)
