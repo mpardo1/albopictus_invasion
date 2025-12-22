@@ -8,7 +8,7 @@ This section explains how to download the raw data sets. We also provide several
 To run the entire code from the beginning (without using the processed files described below) and without changing any paths in the albopictus_invasion repository, download the data, following each point bellow, and save all data sets in the albopictus_invasion/data/ folder:
 
 Download the following data sets:
-  - Boundaries relationship: A set of administrative boundaries for Spain used to join different datasets. Run 0_extract_mob_data.R. This automatically downloads all necessary boundary datasets from the Government of Spain and saves them under: data/boundaries/. The datasets are the following:
+  - Boundaries relationship: A set of administrative boundaries for Spain used to join different datasets. Run 00_extract_mob_data.R. This automatically downloads all necessary boundary datasets from the Government of Spain and saves them under: data/boundaries/. The datasets are the following:
     - mitma_municip.gpkg: shapefile with the boundaries of the mobility areas with ids id_mitma from the human mobility data set.
     - ine_to_mitma_id_correspondence.csv: csv with the relationship between mobility areas ids (id_mitma) and the Spanish administrative units (id_ine).
   - Human mobility data: Human mobility data between mobility areas in Spain (https://www.transportes.gob.es/ministerio/proyectos-singulares/estudios-de-movilidad-con-big-data/opendata-movilidad). Run 00_extract_mob_data.R to obtain the daily human mobility averages. This will create a new path (od_flows/mitma_municip/) where it will save the data.
